@@ -4,6 +4,220 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance - Mini LMS</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .top-bar {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 20px 30px;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #6a11cb;
+    display: inline-block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+  }
+
+  th {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr {
+    transition: all 0.3s ease;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+  }
+
+  .percentage-cell {
+    font-weight: 600;
+  }
+
+  .percentage-cell.high {
+    color: #2ecc71;
+  }
+
+  .percentage-cell.medium {
+    color: #f39c12;
+  }
+
+  .percentage-cell.low {
+    color: #e74c3c;
+  }
+
+  .back-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  .back-btn:active {
+    transform: translateY(0);
+  }
+
+  .back-btn::before {
+    content: "←";
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  .attendance-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    border-top: 4px solid #6a11cb;
+  }
+
+  .summary-card h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .summary-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6a11cb;
+  }
+
+  .progress-bar {
+    height: 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    margin-top: 15px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    transition: width 1s ease-in-out;
+  }
+
+  .course-title {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .attendance-summary {
+      flex-direction: column;
+    }
+    
+    .top-bar {
+      font-size: 20px;
+      text-align: center;
+      padding: 15px;
+    }
+    
+    .container {
+      padding: 0 15px;
+    }
+  }
+
+  /* Animation for table rows */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tr {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  tr:nth-child(2) { animation-delay: 0.1s; }
+  tr:nth-child(3) { animation-delay: 0.2s; }
+  tr:nth-child(4) { animation-delay: 0.3s; }
+</style>
 </head>
 
 <body>
@@ -12,45 +226,93 @@
 
 <div class="container">
   <h2>Course-wise Attendance</h2>
+  
+  <div class="attendance-summary">
+    <div class="summary-card">
+      <h3>Total Courses</h3>
+      <div class="value">3</div>
+    </div>
+    <div class="summary-card">
+      <h3>Overall Attendance</h3>
+      <div class="value">87.8%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 87.8%"></div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <h3>Best Attendance</h3>
+      <div class="value">90%</div>
+      <div>Programming</div>
+    </div>
+  </div>
 
   <table>
-    <tr>
-      <th>Course</th>
-      <th>Total Classes</th>
-      <th>Present</th>
-      <th>Absent</th>
-      <th>Percentage</th>
-    </tr>
-
-    <tr>
-      <td>Programming</td>
-      <td>30</td>
-      <td>27</td>
-      <td>3</td>
-      <td>90%</td>
-    </tr>
-
-    <tr>
-      <td>Data Structures</td>
-      <td>28</td>
-      <td>24</td>
-      <td>4</td>
-      <td>85%</td>
-    </tr>
-
-    <tr>
-      <td>Communication Skills</td>
-      <td>25</td>
-      <td>22</td>
-      <td>3</td>
-      <td>88%</td>
-    </tr>
-
+    <thead>
+      <tr>
+        <th>Course</th>
+        <th>Total Classes</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="course-title">Programming</td>
+        <td>30</td>
+        <td>27</td>
+        <td>3</td>
+        <td class="percentage-cell high">90%</td>
+      </tr>
+      <tr>
+        <td class="course-title">Data Structures</td>
+        <td>28</td>
+        <td>24</td>
+        <td>4</td>
+        <td class="percentage-cell medium">85%</td>
+      </tr>
+      <tr>
+        <td class="course-title">Communication Skills</td>
+        <td>25</td>
+        <td>22</td>
+        <td>3</td>
+        <td class="percentage-cell medium">88%</td>
+      </tr>
+    </tbody>
   </table>
 
   <button class="back-btn">Back to Dashboard</button>
 
 </div>
+
+<script>
+  // Add interactivity to the back button
+  document.querySelector('.back-btn').addEventListener('click', function() {
+    alert('Returning to Dashboard...');
+    // In a real application, this would navigate to the dashboard
+    // window.location.href = 'dashboard.html';
+  });
+
+  // Add click effect to table rows
+  const tableRows = document.querySelectorAll('tbody tr');
+  tableRows.forEach(row => {
+    row.addEventListener('click', function() {
+      const courseName = this.querySelector('.course-title').textContent;
+      alert(`Viewing detailed attendance for ${courseName}`);
+    });
+    
+    // Change cursor to pointer on hover
+    row.style.cursor = 'pointer';
+  });
+  
+  // Calculate overall attendance percentage
+  const percentages = [90, 85, 88];
+  const overallPercentage = (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(1);
+  
+  // Update the overall attendance in the summary
+  document.querySelector('.attendance-summary .summary-card:nth-child(2) .value').textContent = `${overallPercentage}%`;
+  document.querySelector('.progress-fill').style.width = `${overallPercentage}%`;
+</script>
 
 </body>
 </html>
