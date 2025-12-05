@@ -4,6 +4,378 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courses - Mini LMS</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .top-bar {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 20px 30px;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #6a11cb;
+    display: inline-block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+  }
+
+  th {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr {
+    transition: all 0.3s ease;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+  }
+
+  .back-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  .back-btn:active {
+    transform: translateY(0);
+  }
+
+  .back-btn::before {
+    content: "←";
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  .course-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 14px;
+  }
+
+  .view-btn {
+    background: #3498db;
+    color: white;
+  }
+
+  .view-btn:hover {
+    background: #2980b9;
+  }
+
+  .materials-btn {
+    background: #2ecc71;
+    color: white;
+  }
+
+  .materials-btn:hover {
+    background: #27ae60;
+  }
+
+  .drop-btn {
+    background: #e74c3c;
+    color: white;
+  }
+
+  .drop-btn:hover {
+    background: #c0392b;
+  }
+
+  .course-card {
+    display: none;
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #6a11cb;
+  }
+
+  .filter-container {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 10px 20px;
+    background: white;
+    border: 2px solid #6a11cb;
+    border-radius: 25px;
+    color: #6a11cb;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .filter-btn.active {
+    background: #6a11cb;
+    color: white;
+  }
+
+  .filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+  }
+
+  .search-box {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    min-width: 250px;
+  }
+
+  .search-box:focus {
+    outline: none;
+    border-color: #6a11cb;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+  }
+
+  .modal-close-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-top: 15px;
+  }
+
+  .modal-close-btn:hover {
+    background: #c0392b;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .top-bar {
+      font-size: 20px;
+      text-align: center;
+      padding: 15px;
+    }
+    
+    .container {
+      padding: 0 15px;
+    }
+    
+    .course-actions {
+      flex-direction: column;
+    }
+    
+    .filter-container {
+      flex-direction: column;
+    }
+    
+    .search-box {
+      min-width: 100%;
+    }
+  }
+
+  /* Animation for table rows */
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tr {
+    animation: fadeInRow 0.5s ease forwards;
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1001;
+    animation: slideInRight 0.5s ease;
+  }
+
+  .notification.error {
+    background: #e74c3c;
+  }
+
+  .notification.warning {
+    background: #f39c12;
+  }
+
+  .notification.info {
+    background: #3498db;
+  }
+
+  .stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+    border-top: 4px solid #6a11cb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6a11cb;
+  }
+
+  .stat-card .label {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+  }
+</style>
 </head>
 
 <body>
@@ -13,36 +385,667 @@
 <div class="container">
   <h2>Enrolled Courses</h2>
 
-  <table>
-    <tr>
-      <th>Course Code</th>
-      <th>Course Title</th>
-      <th>Teacher</th>
-    </tr>
+  <!-- Statistics -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="value" id="total-courses">3</div>
+      <div class="label">Total Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="cs-courses">2</div>
+      <div class="label">CS Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="other-courses">1</div>
+      <div class="label">Other Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="credits-hours">9</div>
+      <div class="label">Credit Hours</div>
+    </div>
+  </div>
 
-    <tr>
-      <td>CS101</td>
-      <td>Introduction to Programming</td>
-      <td>Sir Ahmed</td>
-    </tr>
+  <!-- Filter and Search -->
+  <div class="filter-container">
+    <input type="text" class="search-box" id="search-courses" placeholder="Search courses by name or code...">
+    <button class="filter-btn active" data-filter="all">All Courses</button>
+    <button class="filter-btn" data-filter="cs">CS Courses</button>
+    <button class="filter-btn" data-filter="eng">ENG Courses</button>
+    <button class="filter-btn" data-filter="active">Active</button>
+  </div>
 
-    <tr>
-      <td>CS102</td>
-      <td>Data Structures</td>
-      <td>Sir Bilal</td>
-    </tr>
+  <!-- Course Cards View (Hidden by default) -->
+  <div id="course-cards-view"></div>
 
-    <tr>
-      <td>ENG101</td>
-      <td>Communication Skills</td>
-      <td>Ma’am Sana</td>
-    </tr>
-
+  <!-- Table View -->
+  <table id="courses-table">
+    <thead>
+      <tr>
+        <th>Course Code</th>
+        <th>Course Title</th>
+        <th>Teacher</th>
+        <th>Schedule</th>
+        <th>Credits</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="courses-table-body">
+      <!-- Table rows will be populated by JavaScript -->
+    </tbody>
   </table>
 
-  <button class="back-btn">Back to Dashboard</button>
+  <div style="text-align: center; margin: 20px 0;">
+    <button id="toggle-view" class="action-btn" style="background: #9b59b6; color: white; padding: 10px 20px;">
+      Switch to Card View
+    </button>
+  </div>
+
+  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
 
 </div>
+
+<script>
+  // Course data
+  const coursesData = [
+    { 
+      id: 1,
+      code: "CS101", 
+      title: "Introduction to Programming", 
+      teacher: "Sir Ahmed",
+      schedule: "Mon/Wed 9:00-10:30",
+      credits: 3,
+      department: "cs",
+      status: "active",
+      description: "Learn the fundamentals of programming using Python. This course covers variables, loops, functions, and basic algorithms.",
+      materials: ["Syllabus.pdf", "Lecture1.pptx", "Assignment1.pdf"],
+      grade: "A-"
+    },
+    { 
+      id: 2,
+      code: "CS102", 
+      title: "Data Structures", 
+      teacher: "Sir Bilal",
+      schedule: "Tue/Thu 11:00-12:30",
+      credits: 3,
+      department: "cs",
+      status: "active",
+      description: "Study of fundamental data structures including arrays, linked lists, stacks, queues, and trees.",
+      materials: ["Syllabus.pdf", "DS_Notes.pdf", "Lab1.pdf"],
+      grade: "B+"
+    },
+    { 
+      id: 3,
+      code: "ENG101", 
+      title: "Communication Skills", 
+      teacher: "Ma'am Sana",
+      schedule: "Mon/Wed 2:00-3:30",
+      credits: 3,
+      department: "eng",
+      status: "active",
+      description: "Develop effective written and oral communication skills for academic and professional contexts.",
+      materials: ["Syllabus.pdf", "WritingGuide.pdf", "PresentationTips.pdf"],
+      grade: "A"
+    },
+    { 
+      id: 4,
+      code: "MATH201", 
+      title: "Calculus II", 
+      teacher: "Dr. Khan",
+      schedule: "Tue/Thu 8:00-9:30",
+      credits: 4,
+      department: "math",
+      status: "completed",
+      description: "Advanced topics in calculus including integration techniques and series.",
+      materials: ["Syllabus.pdf", "FormulaSheet.pdf"],
+      grade: "B"
+    },
+    { 
+      id: 5,
+      code: "CS201", 
+      title: "Object-Oriented Programming", 
+      teacher: "Dr. Ali",
+      schedule: "Mon/Wed/Fri 10:00-11:00",
+      credits: 3,
+      department: "cs",
+      status: "active",
+      description: "Learn object-oriented programming concepts using Java.",
+      materials: ["Syllabus.pdf", "OOP_Notes.pdf"],
+      grade: "In Progress"
+    }
+  ];
+
+  // DOM Elements
+  const tableBody = document.getElementById('courses-table-body');
+  const courseCardsView = document.getElementById('course-cards-view');
+  const backBtn = document.getElementById('back-to-dashboard');
+  const toggleViewBtn = document.getElementById('toggle-view');
+  const searchBox = document.getElementById('search-courses');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  
+  // Statistics elements
+  const totalCoursesEl = document.getElementById('total-courses');
+  const csCoursesEl = document.getElementById('cs-courses');
+  const otherCoursesEl = document.getElementById('other-courses');
+  const creditsHoursEl = document.getElementById('credits-hours');
+
+  // Current view state
+  let currentView = 'table';
+  let currentFilter = 'all';
+  let currentSearch = '';
+
+  // Update statistics
+  function updateStatistics() {
+    const totalCourses = coursesData.length;
+    const csCourses = coursesData.filter(course => course.department === 'cs').length;
+    const otherCourses = totalCourses - csCourses;
+    const totalCredits = coursesData.reduce((sum, course) => sum + course.credits, 0);
+    
+    totalCoursesEl.textContent = totalCourses;
+    csCoursesEl.textContent = csCourses;
+    otherCoursesEl.textContent = otherCourses;
+    creditsHoursEl.textContent = totalCredits;
+  }
+
+  // Get filtered courses based on current filter and search
+  function getFilteredCourses() {
+    let filtered = [...coursesData];
+    
+    // Apply search filter
+    if (currentSearch) {
+      const searchLower = currentSearch.toLowerCase();
+      filtered = filtered.filter(course => 
+        course.code.toLowerCase().includes(searchLower) ||
+        course.title.toLowerCase().includes(searchLower) ||
+        course.teacher.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Apply category filter
+    if (currentFilter !== 'all') {
+      if (currentFilter === 'cs') {
+        filtered = filtered.filter(course => course.department === 'cs');
+      } else if (currentFilter === 'eng') {
+        filtered = filtered.filter(course => course.department === 'eng');
+      } else if (currentFilter === 'active') {
+        filtered = filtered.filter(course => course.status === 'active');
+      }
+    }
+    
+    return filtered;
+  }
+
+  // Create and populate table rows
+  function populateTableView() {
+    const filteredCourses = getFilteredCourses();
+    tableBody.innerHTML = '';
+    
+    if (filteredCourses.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td colspan="6" style="text-align: center; padding: 40px; color: #7f8c8d;">
+          No courses found matching your criteria.
+        </td>
+      `;
+      tableBody.appendChild(row);
+      return;
+    }
+    
+    filteredCourses.forEach((course, index) => {
+      const row = document.createElement('tr');
+      row.style.animationDelay = `${index * 0.1}s`;
+      
+      // Determine status color
+      const statusClass = course.status === 'active' ? 'active-course' : 'completed-course';
+      const statusColor = course.status === 'active' ? '#2ecc71' : '#95a5a6';
+      
+      row.innerHTML = `
+        <td>
+          <strong style="color: #6a11cb;">${course.code}</strong>
+          <div style="font-size: 12px; color: ${statusColor};">${course.status}</div>
+        </td>
+        <td>
+          <div style="font-weight: 600;">${course.title}</div>
+          <div style="font-size: 14px; color: #7f8c8d;">${course.description.substring(0, 60)}...</div>
+        </td>
+        <td>${course.teacher}</td>
+        <td>
+          <div>${course.schedule}</div>
+          <div style="font-size: 12px; color: #7f8c8d;">${course.credits} credits</div>
+        </td>
+        <td>
+          <div style="font-weight: 600; color: #6a11cb;">${course.credits}</div>
+        </td>
+        <td>
+          <div class="course-actions">
+            <button class="action-btn view-btn" data-course-id="${course.id}">View</button>
+            <button class="action-btn materials-btn" data-course-id="${course.id}">Materials</button>
+            ${course.status === 'active' ? `<button class="action-btn drop-btn" data-course-id="${course.id}">Drop</button>` : ''}
+          </div>
+        </td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showCourseDetails(course);
+      });
+    });
+    
+    document.querySelectorAll('.materials-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showCourseMaterials(course);
+      });
+    });
+    
+    document.querySelectorAll('.drop-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showDropConfirmation(course);
+      });
+    });
+    
+    // Make rows clickable
+    document.querySelectorAll('tbody tr').forEach(row => {
+      row.addEventListener('click', function() {
+        const courseCode = this.querySelector('td:first-child strong').textContent;
+        const course = coursesData.find(c => c.code === courseCode);
+        if (course) showCourseDetails(course);
+      });
+      row.style.cursor = 'pointer';
+    });
+  }
+
+  // Create and populate card view
+  function populateCardView() {
+    const filteredCourses = getFilteredCourses();
+    courseCardsView.innerHTML = '';
+    
+    if (filteredCourses.length === 0) {
+      courseCardsView.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #7f8c8d; background: white; border-radius: 10px;">
+          No courses found matching your criteria.
+        </div>
+      `;
+      return;
+    }
+    
+    filteredCourses.forEach((course, index) => {
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.style.display = 'block';
+      
+      // Determine status color
+      const statusColor = course.status === 'active' ? '#2ecc71' : '#95a5a6';
+      const borderColor = course.department === 'cs' ? '#6a11cb' : 
+                         course.department === 'eng' ? '#e74c3c' : 
+                         course.department === 'math' ? '#f39c12' : '#3498db';
+      
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+          <div>
+            <h3 style="color: ${borderColor}; margin-bottom: 5px;">${course.code}: ${course.title}</h3>
+            <div style="color: #7f8c8d; margin-bottom: 10px;">${course.teacher}</div>
+          </div>
+          <div style="background: ${statusColor}; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
+            ${course.status}
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 15px; color: #555;">
+          ${course.description}
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px;">
+          <div>
+            <strong>Schedule:</strong> ${course.schedule}
+          </div>
+          <div>
+            <strong>Credits:</strong> ${course.credits}
+          </div>
+          <div>
+            <strong>Grade:</strong> ${course.grade}
+          </div>
+        </div>
+        
+        <div class="course-actions">
+          <button class="action-btn view-btn" data-course-id="${course.id}">View Details</button>
+          <button class="action-btn materials-btn" data-course-id="${course.id}">Course Materials</button>
+          ${course.status === 'active' ? `<button class="action-btn drop-btn" data-course-id="${course.id}">Drop Course</button>` : ''}
+        </div>
+      `;
+      
+      courseCardsView.appendChild(card);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showCourseDetails(course);
+      });
+    });
+    
+    document.querySelectorAll('.materials-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showCourseMaterials(course);
+      });
+    });
+    
+    document.querySelectorAll('.drop-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showDropConfirmation(course);
+      });
+    });
+  }
+
+  // Toggle between table and card view
+  function toggleView() {
+    if (currentView === 'table') {
+      currentView = 'card';
+      document.getElementById('courses-table').style.display = 'none';
+      courseCardsView.style.display = 'block';
+      populateCardView();
+      toggleViewBtn.textContent = 'Switch to Table View';
+    } else {
+      currentView = 'table';
+      document.getElementById('courses-table').style.display = 'table';
+      courseCardsView.style.display = 'none';
+      populateTableView();
+      toggleViewBtn.textContent = 'Switch to Card View';
+    }
+  }
+
+  // Show course details modal
+  function showCourseDetails(course) {
+    const modalHTML = `
+      <div class="modal-overlay" id="course-modal">
+        <div class="modal-content">
+          <h3 style="color: #2c3e50; margin-bottom: 10px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
+            ${course.code}: ${course.title}
+          </h3>
+          
+          <div style="margin-bottom: 20px;">
+            <p><strong>Instructor:</strong> ${course.teacher}</p>
+            <p><strong>Schedule:</strong> ${course.schedule}</p>
+            <p><strong>Credit Hours:</strong> ${course.credits}</p>
+            <p><strong>Department:</strong> ${course.department.toUpperCase()}</p>
+            <p><strong>Status:</strong> <span style="color: ${course.status === 'active' ? '#2ecc71' : '#95a5a6'}">${course.status}</span></p>
+            <p><strong>Current Grade:</strong> <span style="font-weight: bold;">${course.grade}</span></p>
+          </div>
+          
+          <div style="margin: 20px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 10px;">Course Description</h4>
+            <p style="line-height: 1.6;">${course.description}</p>
+          </div>
+          
+          <div style="margin: 20px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 10px;">Course Materials (${course.materials.length})</h4>
+            <ul style="padding-left: 20px;">
+              ${course.materials.map(material => `<li>${material}</li>`).join('')}
+            </ul>
+          </div>
+          
+          <button class="modal-close-btn" id="close-modal">Close</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    setupModalEvents();
+  }
+
+  // Show course materials modal
+  function showCourseMaterials(course) {
+    const modalHTML = `
+      <div class="modal-overlay" id="materials-modal">
+        <div class="modal-content">
+          <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
+            Course Materials: ${course.code}
+          </h3>
+          
+          <div style="margin-bottom: 20px;">
+            <p><strong>Course:</strong> ${course.title}</p>
+            <p><strong>Instructor:</strong> ${course.teacher}</p>
+          </div>
+          
+          <div style="margin: 20px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 15px;">Available Materials</h4>
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px;">
+              ${course.materials.map((material, index) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                  <div>
+                    <span style="font-weight: 600;">${material}</span>
+                    <div style="font-size: 12px; color: #7f8c8d;">Uploaded: ${index === 0 ? '2 days ago' : '1 week ago'}</div>
+                  </div>
+                  <button class="action-btn view-btn" onclick="downloadMaterial('${material}')" style="font-size: 12px; padding: 5px 10px;">
+                    Download
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div style="margin: 20px 0; padding: 15px; background: #e8f4fc; border-radius: 8px; border-left: 4px solid #3498db;">
+            <strong>Note:</strong> All materials are for educational purposes only. Please respect copyright laws.
+          </div>
+          
+          <button class="modal-close-btn" id="close-modal">Close</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    setupModalEvents();
+  }
+
+  // Show drop course confirmation
+  function showDropConfirmation(course) {
+    const modalHTML = `
+      <div class="modal-overlay" id="drop-modal">
+        <div class="modal-content">
+          <h3 style="color: #e74c3c; margin-bottom: 20px; border-bottom: 2px solid #e74c3c; padding-bottom: 10px;">
+            Drop Course Confirmation
+          </h3>
+          
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 72px; color: #e74c3c; margin-bottom: 20px;">⚠️</div>
+            <p style="font-size: 18px; margin-bottom: 10px;">
+              Are you sure you want to drop <strong>${course.code}: ${course.title}</strong>?
+            </p>
+            <p style="color: #7f8c8d;">
+              This action cannot be undone. You will lose access to all course materials and assignments.
+            </p>
+          </div>
+          
+          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+            <button id="confirm-drop" class="action-btn drop-btn" style="padding: 12px 24px;">
+              Yes, Drop Course
+            </button>
+            <button id="cancel-drop" class="action-btn view-btn" style="padding: 12px 24px;">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    const modal = document.getElementById('drop-modal');
+    const confirmBtn = document.getElementById('confirm-drop');
+    const cancelBtn = document.getElementById('cancel-drop');
+    
+    confirmBtn.addEventListener('click', () => {
+      // In a real app, this would make an API call to drop the course
+      showNotification(`Successfully dropped ${course.code}`, 'info');
+      modal.remove();
+      
+      // Simulate removing the course from the list
+      const index = coursesData.findIndex(c => c.id === course.id);
+      if (index !== -1) {
+        coursesData.splice(index, 1);
+        updateStatistics();
+        currentView === 'table' ? populateTableView() : populateCardView();
+      }
+    });
+    
+    cancelBtn.addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+    
+    // Close with Escape key
+    document.addEventListener('keydown', function closeOnEscape(e) {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', closeOnEscape);
+      }
+    });
+  }
+
+  // Setup modal events
+  function setupModalEvents() {
+    const modal = document.querySelector('.modal-overlay');
+    const closeBtn = document.querySelector('.modal-close-btn');
+    
+    closeBtn.addEventListener('click', () => closeModal(modal));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal(modal);
+    });
+    
+    // Close with Escape key
+    document.addEventListener('keydown', function closeOnEscape(e) {
+      if (e.key === 'Escape') {
+        closeModal(modal);
+        document.removeEventListener('keydown', closeOnEscape);
+      }
+    });
+  }
+
+  // Close modal
+  function closeModal(modal) {
+    modal.style.animation = 'fadeOut 0.3s ease';
+    setTimeout(() => {
+      modal.remove();
+    }, 300);
+  }
+
+  // Show notification
+  function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => notification.remove(), 500);
+    }, 3000);
+  }
+
+  // Download material (simulated)
+  function downloadMaterial(filename) {
+    showNotification(`Downloading ${filename}...`, 'info');
+    // In a real app, this would trigger a file download
+  }
+
+  // Initialize the page
+  function init() {
+    // Update statistics
+    updateStatistics();
+    
+    // Populate initial table view
+    populateTableView();
+    
+    // Back button functionality
+    backBtn.addEventListener('click', function() {
+      const originalText = this.innerHTML;
+      this.innerHTML = 'Redirecting...';
+      this.disabled = true;
+      
+      showNotification('Returning to Dashboard...', 'info');
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.disabled = false;
+        // In real app: window.location.href = 'dashboard.html';
+        showNotification('Dashboard navigation simulated.', 'info');
+      }, 1500);
+    });
+    
+    // Toggle view button
+    toggleViewBtn.addEventListener('click', toggleView);
+    
+    // Search functionality
+    searchBox.addEventListener('input', function() {
+      currentSearch = this.value;
+      currentView === 'table' ? populateTableView() : populateCardView();
+    });
+    
+    // Filter buttons
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active state
+        filterBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update filter
+        currentFilter = this.getAttribute('data-filter');
+        currentView === 'table' ? populateTableView() : populateCardView();
+      });
+    });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + F to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchBox.focus();
+      }
+      
+      // Ctrl/Cmd + T to toggle view
+      if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+        e.preventDefault();
+        toggleView();
+      }
+      
+      // Escape to close modals
+      if (e.key === 'Escape') {
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+      }
+    });
+    
+    // Show welcome message
+    setTimeout(() => {
+      showNotification('Courses page loaded. Click on any course for details!', 'success');
+    }, 1000);
+  }
+
+  // Initialize when page loads
+  document.addEventListener('DOMContentLoaded', init);
+</script>
 
 </body>
 </html>
