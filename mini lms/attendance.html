@@ -148,6 +148,12 @@
     min-width: 200px;
     text-align: center;
     border-top: 4px solid #6a11cb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .summary-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-5px);
   }
 
   .summary-card h3 {
@@ -180,6 +186,108 @@
   .course-title {
     font-weight: 600;
     color: #2c3e50;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .course-title:hover::after {
+    content: 'Click for details';
+    position: absolute;
+    background: #2c3e50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    top: -30px;
+    left: 0;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .course-title:hover::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2c3e50 transparent transparent transparent;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+  }
+
+  .modal-close-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-top: 15px;
+  }
+
+  .modal-close-btn:hover {
+    background: #c0392b;
+  }
+
+  /* Notification Styles */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1001;
+    animation: slideInRight 0.5s ease;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   /* Responsive styles */
@@ -202,21 +310,32 @@
     .container {
       padding: 0 15px;
     }
+    
+    .modal-content {
+      padding: 20px;
+      width: 95%;
+    }
   }
 
   /* Animation for table rows */
-  @keyframes fadeIn {
+  @keyframes fadeInRow {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   tr {
-    animation: fadeIn 0.5s ease forwards;
+    animation: fadeInRow 0.5s ease forwards;
   }
 
   tr:nth-child(2) { animation-delay: 0.1s; }
   tr:nth-child(3) { animation-delay: 0.2s; }
   tr:nth-child(4) { animation-delay: 0.3s; }
+
+  /* Accessibility */
+  tr:focus {
+    outline: 2px solid #6a11cb;
+    outline-offset: 2px;
+  }
 </style>
 </head>
 
@@ -230,19 +349,19 @@
   <div class="attendance-summary">
     <div class="summary-card">
       <h3>Total Courses</h3>
-      <div class="value">3</div>
+      <div class="value" id="total-courses">3</div>
     </div>
     <div class="summary-card">
       <h3>Overall Attendance</h3>
-      <div class="value">87.8%</div>
+      <div class="value" id="overall-percentage">87.8%</div>
       <div class="progress-bar">
-        <div class="progress-fill" style="width: 87.8%"></div>
+        <div class="progress-fill" id="overall-progress" style="width: 87.8%"></div>
       </div>
     </div>
     <div class="summary-card">
       <h3>Best Attendance</h3>
-      <div class="value">90%</div>
-      <div>Programming</div>
+      <div class="value" id="best-percentage">90%</div>
+      <div id="best-course">Programming</div>
     </div>
   </div>
 
@@ -256,63 +375,341 @@
         <th>Percentage</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td class="course-title">Programming</td>
-        <td>30</td>
-        <td>27</td>
-        <td>3</td>
-        <td class="percentage-cell high">90%</td>
-      </tr>
-      <tr>
-        <td class="course-title">Data Structures</td>
-        <td>28</td>
-        <td>24</td>
-        <td>4</td>
-        <td class="percentage-cell medium">85%</td>
-      </tr>
-      <tr>
-        <td class="course-title">Communication Skills</td>
-        <td>25</td>
-        <td>22</td>
-        <td>3</td>
-        <td class="percentage-cell medium">88%</td>
-      </tr>
+    <tbody id="attendance-table-body">
+      <!-- Table rows will be populated by JavaScript -->
     </tbody>
   </table>
 
-  <button class="back-btn">Back to Dashboard</button>
+  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
 
 </div>
 
 <script>
-  // Add interactivity to the back button
-  document.querySelector('.back-btn').addEventListener('click', function() {
-    alert('Returning to Dashboard...');
-    // In a real application, this would navigate to the dashboard
-    // window.location.href = 'dashboard.html';
-  });
+  // Attendance data
+  const attendanceData = [
+    { 
+      id: 1, 
+      course: "Programming", 
+      totalClasses: 30, 
+      present: 27, 
+      absent: 3, 
+      percentage: 90 
+    },
+    { 
+      id: 2, 
+      course: "Data Structures", 
+      totalClasses: 28, 
+      present: 24, 
+      absent: 4, 
+      percentage: 85 
+    },
+    { 
+      id: 3, 
+      course: "Communication Skills", 
+      totalClasses: 25, 
+      present: 22, 
+      absent: 3, 
+      percentage: 88 
+    },
+    { 
+      id: 4, 
+      course: "Database Systems", 
+      totalClasses: 32, 
+      present: 30, 
+      absent: 2, 
+      percentage: 94 
+    },
+    { 
+      id: 5, 
+      course: "Web Development", 
+      totalClasses: 26, 
+      present: 20, 
+      absent: 6, 
+      percentage: 77 
+    }
+  ];
 
-  // Add click effect to table rows
-  const tableRows = document.querySelectorAll('tbody tr');
-  tableRows.forEach(row => {
-    row.addEventListener('click', function() {
-      const courseName = this.querySelector('.course-title').textContent;
-      alert(`Viewing detailed attendance for ${courseName}`);
+  // DOM Elements
+  const backBtn = document.getElementById('back-to-dashboard');
+  const tableBody = document.getElementById('attendance-table-body');
+  const totalCoursesEl = document.getElementById('total-courses');
+  const overallPercentageEl = document.getElementById('overall-percentage');
+  const overallProgressEl = document.getElementById('overall-progress');
+  const bestPercentageEl = document.getElementById('best-percentage');
+  const bestCourseEl = document.getElementById('best-course');
+
+  // Get percentage class based on value
+  function getPercentageClass(percentage) {
+    if (percentage >= 90) return 'high';
+    if (percentage >= 80) return 'medium';
+    return 'low';
+  }
+
+  // Calculate statistics
+  function calculateStatistics() {
+    const totalCourses = attendanceData.length;
+    const totalClasses = attendanceData.reduce((sum, course) => sum + course.totalClasses, 0);
+    const totalPresent = attendanceData.reduce((sum, course) => sum + course.present, 0);
+    const overallPercentage = ((totalPresent / totalClasses) * 100).toFixed(1);
+    
+    // Find best attendance
+    let bestAttendance = 0;
+    let bestCourse = '';
+    attendanceData.forEach(course => {
+      if (course.percentage > bestAttendance) {
+        bestAttendance = course.percentage;
+        bestCourse = course.course;
+      }
     });
     
-    // Change cursor to pointer on hover
-    row.style.cursor = 'pointer';
-  });
-  
-  // Calculate overall attendance percentage
-  const percentages = [90, 85, 88];
-  const overallPercentage = (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(1);
-  
-  // Update the overall attendance in the summary
-  document.querySelector('.attendance-summary .summary-card:nth-child(2) .value').textContent = `${overallPercentage}%`;
-  document.querySelector('.progress-fill').style.width = `${overallPercentage}%`;
+    return {
+      totalCourses,
+      totalClasses,
+      totalPresent,
+      overallPercentage,
+      bestAttendance,
+      bestCourse
+    };
+  }
+
+  // Update summary cards
+  function updateSummaryCards() {
+    const stats = calculateStatistics();
+    
+    totalCoursesEl.textContent = stats.totalCourses;
+    overallPercentageEl.textContent = `${stats.overallPercentage}%`;
+    overallProgressEl.style.width = `${stats.overallPercentage}%`;
+    bestPercentageEl.textContent = `${stats.bestAttendance}%`;
+    bestCourseEl.textContent = stats.bestCourse;
+  }
+
+  // Create and populate table rows
+  function populateTable() {
+    tableBody.innerHTML = '';
+    
+    attendanceData.forEach((course, index) => {
+      const row = document.createElement('tr');
+      const percentageClass = getPercentageClass(course.percentage);
+      
+      // Add animation delay based on index
+      row.style.animationDelay = `${index * 0.1}s`;
+      
+      row.innerHTML = `
+        <td class="course-title" data-course-id="${course.id}">${course.course}</td>
+        <td>${course.totalClasses}</td>
+        <td>${course.present}</td>
+        <td>${course.absent}</td>
+        <td class="percentage-cell ${percentageClass}">${course.percentage}%</td>
+      `;
+      
+      // Add click event for row
+      row.addEventListener('click', () => showCourseModal(course));
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          showCourseModal(course);
+        }
+      });
+      row.setAttribute('tabindex', '0');
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-label', `View details for ${course.course}`);
+      
+      tableBody.appendChild(row);
+    });
+  }
+
+  // Show course details modal
+  function showCourseModal(course) {
+    const percentageClass = getPercentageClass(course.percentage);
+    const percentageColor = course.percentage >= 90 ? '#2ecc71' : 
+                          course.percentage >= 80 ? '#f39c12' : '#e74c3c';
+    
+    const modalHTML = `
+      <div class="modal-overlay" id="course-modal">
+        <div class="modal-content">
+          <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
+            ${course.course} - Attendance Details
+          </h3>
+          
+          <div style="margin-bottom: 20px;">
+            <p><strong>Course Code:</strong> CS${course.id}00</p>
+            <p><strong>Total Classes:</strong> ${course.totalClasses}</p>
+            <p><strong>Present:</strong> ${course.present}</p>
+            <p><strong>Absent:</strong> ${course.absent}</p>
+            <p><strong>Attendance Percentage:</strong> 
+              <span style="color: ${percentageColor}; font-weight: bold;">${course.percentage}%</span>
+            </p>
+            <p><strong>Attendance Status:</strong> 
+              <span style="color: ${percentageColor}; font-weight: bold;">
+                ${course.percentage >= 90 ? 'Excellent' : 
+                  course.percentage >= 80 ? 'Good' : 
+                  course.percentage >= 75 ? 'Satisfactory' : 'Needs Improvement'}
+              </span>
+            </p>
+          </div>
+          
+          <div style="margin: 25px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 10px;">Attendance Progress</h4>
+            <div class="progress-bar" style="height: 20px; margin-bottom: 10px;">
+              <div class="progress-fill" style="width: ${course.percentage}%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #7f8c8d;">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
+          
+          <div style="margin: 25px 0;">
+            <h4 style="color: #2c3e50; margin-bottom: 10px;">Remarks</h4>
+            <p style="padding: 15px; background: ${course.percentage >= 75 ? '#d5f4e6' : '#f9e79f'}; 
+               border-radius: 8px; border-left: 4px solid ${course.percentage >= 75 ? '#2ecc71' : '#f39c12'};">
+              ${course.percentage >= 90 ? 'Excellent attendance! Keep up the outstanding work.' : 
+                course.percentage >= 80 ? 'Good attendance. You are doing well.' : 
+                course.percentage >= 75 ? 'Satisfactory attendance. Try to improve a bit.' : 
+                'Attendance needs improvement. Please attend more classes regularly.'}
+            </p>
+          </div>
+          
+          <button class="modal-close-btn" id="close-modal">Close Details</button>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners for modal
+    const modal = document.getElementById('course-modal');
+    const closeBtn = document.getElementById('close-modal');
+    
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function closeOnEscape(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', closeOnEscape);
+      }
+    });
+    
+    function closeModal() {
+      modal.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => {
+        modal.remove();
+      }, 300);
+    }
+  }
+
+  // Show notification
+  function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    notification.style.background = type === 'success' ? '#2ecc71' : 
+                                   type === 'warning' ? '#f39c12' : 
+                                   type === 'error' ? '#e74c3c' : '#3498db';
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => {
+        notification.remove();
+      }, 500);
+    }, 3000);
+  }
+
+  // Simulate attendance update (for demo purposes)
+  function simulateAttendanceUpdate() {
+    // Randomly update one course's attendance
+    const randomIndex = Math.floor(Math.random() * attendanceData.length);
+    const course = attendanceData[randomIndex];
+    
+    // Simulate a new class attended
+    course.totalClasses += 1;
+    course.present += 1;
+    course.percentage = Math.round((course.present / course.totalClasses) * 100);
+    
+    // Update the table and summary
+    populateTable();
+    updateSummaryCards();
+    
+    // Show notification
+    showNotification(`${course.course} attendance updated! New class marked as present.`);
+  }
+
+  // Initialize the page
+  function init() {
+    // Populate table and update summary
+    populateTable();
+    updateSummaryCards();
+    
+    // Back button functionality
+    backBtn.addEventListener('click', function() {
+      // Add loading effect
+      const originalText = this.innerHTML;
+      this.innerHTML = 'Loading...';
+      this.disabled = true;
+      
+      // Show notification
+      showNotification('Returning to Dashboard...', 'info');
+      
+      // Simulate loading delay
+      setTimeout(() => {
+        // In a real application, this would navigate to the dashboard
+        // window.location.href = 'dashboard.html';
+        
+        // For demo, just reset the button
+        this.innerHTML = originalText;
+        this.disabled = false;
+        
+        // Show demo message
+        showNotification('Dashboard navigation simulated. In a real app, this would redirect.', 'info');
+      }, 1500);
+    });
+    
+    // Add keyboard navigation for table rows
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const rows = document.querySelectorAll('tbody tr');
+        const currentRow = document.activeElement;
+        
+        if (rows.length === 0) return;
+        
+        let currentIndex = -1;
+        rows.forEach((row, index) => {
+          if (row === currentRow) currentIndex = index;
+        });
+        
+        if (e.key === 'ArrowDown' && currentIndex < rows.length - 1) {
+          rows[currentIndex + 1].focus();
+        } else if (e.key === 'ArrowUp' && currentIndex > 0) {
+          rows[currentIndex - 1].focus();
+        } else if (currentIndex === -1) {
+          // If no row is focused, focus the first one
+          rows[0].focus();
+        }
+      }
+    });
+    
+    // Demo: Simulate attendance updates every 10 seconds
+    setInterval(simulateAttendanceUpdate, 10000);
+    
+    // Show welcome message
+    setTimeout(() => {
+      showNotification('Attendance page loaded. Click on any course for details!', 'success');
+    }, 1000);
+  }
+
+  // Initialize when page loads
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
-</html>
+</html>sa
