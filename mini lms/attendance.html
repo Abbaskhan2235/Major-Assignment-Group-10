@@ -4,88 +4,334 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance - Mini LMS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Reset and Base Styles */
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   body {
-    background-color: #f5f7fa;
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
     color: #333;
     line-height: 1.6;
+    min-height: 100vh;
   }
 
+  /* Top Bar */
   .top-bar {
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: white;
-    padding: 20px 30px;
-    font-size: 24px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.2rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .container {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
-  }
-
-  h2 {
-    color: #2c3e50;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #6a11cb;
-    display: inline-block;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
-  }
-
-  th {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
-    padding: 18px 15px;
-    text-align: left;
+  .top-bar h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .top-bar h1 i {
+    color: #6a11cb;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .user-info img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(106, 17, 203, 0.3);
+  }
+
+  /* Container */
+  .container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .page-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .page-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+  }
+
+  /* Summary Cards */
+  .attendance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    border-top: 4px solid transparent;
+  }
+
+  .summary-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .summary-card:nth-child(1) {
+    border-top-color: #6a11cb;
+  }
+
+  .summary-card:nth-child(2) {
+    border-top-color: #2ecc71;
+  }
+
+  .summary-card:nth-child(3) {
+    border-top-color: #f39c12;
+  }
+
+  .summary-card h3 {
+    font-size: 1rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
-  tr {
+  .summary-card .value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+    line-height: 1;
+  }
+
+  .summary-card .value::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+    margin-top: 0.5rem;
+  }
+
+  .summary-card:nth-child(2) .value::after {
+    background: linear-gradient(90deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .summary-card:nth-child(3) .value::after {
+    background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      rgba(255, 255, 255, 0.3) 50%, 
+      rgba(255, 255, 255, 0.1) 100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Table Container */
+  .table-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+  }
+
+  th {
+    padding: 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  th:first-child {
+    padding-left: 2.5rem;
+  }
+
+  th:last-child {
+    padding-right: 2.5rem;
+  }
+
+  tbody tr {
     transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
   }
 
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
+  tbody tr:last-child {
+    border-bottom: none;
   }
 
-  tr:hover {
-    background-color: #f1f5ff;
+  tbody tr:hover {
+    background: #f8fafc;
     transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
   }
 
   td {
-    padding: 16px 15px;
-    border-bottom: 1px solid #eee;
-    color: #555;
+    padding: 1.5rem;
+    color: #475569;
   }
 
-  .percentage-cell {
+  td:first-child {
+    padding-left: 2.5rem;
     font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  td:last-child {
+    padding-right: 2.5rem;
+  }
+
+  /* Course Cell */
+  .course-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .course-title:hover {
+    color: #6a11cb;
+    transform: translateX(5px);
+  }
+
+  .course-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  /* Dynamic course icon colors based on course */
+  td:first-child .course-title[data-course-id="1"] .course-icon {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  td:first-child .course-title[data-course-id="2"] .course-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  td:first-child .course-title[data-course-id="3"] .course-icon {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  td:first-child .course-title[data-course-id="4"] .course-icon {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  }
+
+  td:first-child .course-title[data-course-id="5"] .course-icon {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  }
+
+  /* Percentage Cell */
+  .percentage-cell {
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .percentage-cell.high {
@@ -100,184 +346,171 @@
     color: #e74c3c;
   }
 
+  .percentage-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+  }
+
+  .percentage-cell.high .percentage-badge {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+  }
+
+  .percentage-cell.medium .percentage-badge {
+    background: rgba(243, 156, 18, 0.1);
+    color: #f39c12;
+  }
+
+  .percentage-cell.low .percentage-badge {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+  }
+
+  /* Progress Indicator */
+  .progress-indicator {
+    width: 100px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  .progress-indicator-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  /* Back Button */
   .back-btn {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: white;
     border: none;
-    padding: 14px 28px;
-    font-size: 16px;
+    padding: 1rem 2rem;
+    border-radius: 12px;
     font-weight: 600;
-    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
     margin: 0 auto;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .back-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
   }
 
   .back-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
   }
 
-  .back-btn:active {
-    transform: translateY(0);
+  .back-btn:hover::before {
+    left: 100%;
   }
 
-  .back-btn::before {
-    content: "←";
-    margin-right: 8px;
-    font-size: 18px;
-  }
-
-  .attendance-summary {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-
-  .summary-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    flex: 1;
-    min-width: 200px;
-    text-align: center;
-    border-top: 4px solid #6a11cb;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .summary-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    transform: translateY(-5px);
-  }
-
-  .summary-card h3 {
-    color: #2c3e50;
-    margin-bottom: 10px;
-    font-size: 18px;
-  }
-
-  .summary-card .value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #6a11cb;
-  }
-
-  .progress-bar {
-    height: 10px;
-    background-color: #ecf0f1;
-    border-radius: 5px;
-    margin-top: 15px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 5px;
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    transition: width 1s ease-in-out;
-  }
-
-  .course-title {
-    font-weight: 600;
-    color: #2c3e50;
-    position: relative;
-    cursor: pointer;
-  }
-
-  .course-title:hover::after {
-    content: 'Click for details';
-    position: absolute;
-    background: #2c3e50;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    top: -30px;
-    left: 0;
-    white-space: nowrap;
-    z-index: 10;
-  }
-
-  .course-title:hover::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 10px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #2c3e50 transparent transparent transparent;
-  }
-
-  /* Modal Styles */
+  /* Modal Overlay */
   .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     z-index: 1000;
+    padding: 1rem;
     animation: fadeIn 0.3s ease;
   }
 
-  .modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    animation: slideIn 0.3s ease;
-  }
-
-  .modal-close-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-    margin-top: 15px;
-  }
-
-  .modal-close-btn:hover {
-    background: #c0392b;
-  }
-
-  /* Notification Styles */
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #2ecc71;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    z-index: 1001;
-    animation: slideInRight 0.5s ease;
-  }
-
-  /* Animations */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
 
-  @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  /* Modal Content */
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-content h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #6a11cb;
+  }
+
+  /* Modal Close Button */
+  .modal-close-btn {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .modal-close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    color: #1a1a2e;
+    padding: 1.2rem 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid #6a11cb;
+    animation: slideInRight 0.5s ease;
+    max-width: 400px;
   }
 
   @keyframes slideInRight {
@@ -285,36 +518,20 @@
     to { transform: translateX(0); opacity: 1; }
   }
 
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+  .notification.success {
+    border-left-color: #2ecc71;
   }
 
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    table {
-      display: block;
-      overflow-x: auto;
-    }
-    
-    .attendance-summary {
-      flex-direction: column;
-    }
-    
-    .top-bar {
-      font-size: 20px;
-      text-align: center;
-      padding: 15px;
-    }
-    
-    .container {
-      padding: 0 15px;
-    }
-    
-    .modal-content {
-      padding: 20px;
-      width: 95%;
-    }
+  .notification.warning {
+    border-left-color: #f39c12;
+  }
+
+  .notification.error {
+    border-left-color: #e74c3c;
+  }
+
+  .notification.info {
+    border-left-color: #3498db;
   }
 
   /* Animation for table rows */
@@ -323,33 +540,113 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  tr {
+  tbody tr {
     animation: fadeInRow 0.5s ease forwards;
   }
 
-  tr:nth-child(2) { animation-delay: 0.1s; }
-  tr:nth-child(3) { animation-delay: 0.2s; }
-  tr:nth-child(4) { animation-delay: 0.3s; }
+  tbody tr:nth-child(1) { animation-delay: 0.1s; }
+  tbody tr:nth-child(2) { animation-delay: 0.2s; }
+  tbody tr:nth-child(3) { animation-delay: 0.3s; }
+  tbody tr:nth-child(4) { animation-delay: 0.4s; }
+  tbody tr:nth-child(5) { animation-delay: 0.5s; }
 
-  /* Accessibility */
-  tr:focus {
-    outline: 2px solid #6a11cb;
-    outline-offset: 2px;
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .attendance-summary {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      min-width: 900px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .top-bar {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    
+    .user-info {
+      align-self: stretch;
+      justify-content: center;
+    }
+    
+    .page-header h2 {
+      font-size: 1.8rem;
+    }
+    
+    .summary-card {
+      padding: 1.5rem;
+    }
+    
+    .summary-card .value {
+      font-size: 2.2rem;
+    }
+    
+    .modal-content {
+      padding: 1.5rem;
+    }
+    
+    .notification {
+      left: 1rem;
+      right: 1rem;
+      max-width: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .attendance-summary {
+      grid-template-columns: 1fr;
+    }
+    
+    .percentage-cell {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .back-btn {
+      width: 100%;
+      padding: 1.2rem;
+    }
   }
 </style>
 </head>
 
 <body>
 
-<div class="top-bar">Attendance Record</div>
+<div class="top-bar">
+  <h1><i class="fas fa-calendar-check"></i> Attendance Record</h1>
+  <div class="user-info">
+    <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff" alt="Student">
+    <span>John Doe | ID: 14656</span>
+  </div>
+</div>
 
 <div class="container">
-  <h2>Course-wise Attendance</h2>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Course-wise Attendance</h2>
+  </div>
   
+  <!-- Summary Cards -->
   <div class="attendance-summary">
     <div class="summary-card">
       <h3>Total Courses</h3>
-      <div class="value" id="total-courses">3</div>
+      <div class="value" id="total-courses">5</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 100%"></div>
+      </div>
     </div>
     <div class="summary-card">
       <h3>Overall Attendance</h3>
@@ -360,30 +657,36 @@
     </div>
     <div class="summary-card">
       <h3>Best Attendance</h3>
-      <div class="value" id="best-percentage">90%</div>
-      <div id="best-course">Programming</div>
+      <div class="value" id="best-percentage">94%</div>
+      <div id="best-course">Database Systems</div>
     </div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Course</th>
-        <th>Total Classes</th>
-        <th>Present</th>
-        <th>Absent</th>
-        <th>Percentage</th>
-      </tr>
-    </thead>
-    <tbody id="attendance-table-body">
-      <!-- Table rows will be populated by JavaScript -->
-    </tbody>
-  </table>
+  <!-- Table Container -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Total Classes</th>
+          <th>Present</th>
+          <th>Absent</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="attendance-table-body">
+        <!-- Table rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+  </div>
 
-  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
+  <button class="back-btn" id="back-to-dashboard">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </button>
 
 </div>
 
+<!-- JavaScript remains EXACTLY as provided -->
 <script>
   // Attendance data
   const attendanceData = [
@@ -495,24 +798,38 @@
       row.style.animationDelay = `${index * 0.1}s`;
       
       row.innerHTML = `
-        <td class="course-title" data-course-id="${course.id}">${course.course}</td>
+        <td><div class="course-title" data-course-id="${course.id}">
+          <div class="course-icon">
+            <i class="fas fa-${course.id === 1 ? 'code' : course.id === 2 ? 'sitemap' : course.id === 3 ? 'comments' : course.id === 4 ? 'database' : 'laptop'}"></i>
+          </div>
+          ${course.course}
+        </div></td>
         <td>${course.totalClasses}</td>
         <td>${course.present}</td>
         <td>${course.absent}</td>
-        <td class="percentage-cell ${percentageClass}">${course.percentage}%</td>
+        <td class="percentage-cell ${percentageClass}">
+          ${course.percentage}%
+          <span class="percentage-badge">
+            ${percentageClass === 'high' ? 'Excellent' : percentageClass === 'medium' ? 'Good' : 'Needs Improvement'}
+          </span>
+          <div class="progress-indicator">
+            <div class="progress-indicator-fill" style="width: ${course.percentage}%; background: ${percentageClass === 'high' ? '#2ecc71' : percentageClass === 'medium' ? '#f39c12' : '#e74c3c'}"></div>
+          </div>
+        </td>
       `;
       
       // Add click event for row
-      row.addEventListener('click', () => showCourseModal(course));
-      row.addEventListener('keydown', (e) => {
+      const courseTitle = row.querySelector('.course-title');
+      courseTitle.addEventListener('click', () => showCourseModal(course));
+      courseTitle.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           showCourseModal(course);
         }
       });
-      row.setAttribute('tabindex', '0');
-      row.setAttribute('role', 'button');
-      row.setAttribute('aria-label', `View details for ${course.course}`);
+      courseTitle.setAttribute('tabindex', '0');
+      courseTitle.setAttribute('role', 'button');
+      courseTitle.setAttribute('aria-label', `View details for ${course.course}`);
       
       tableBody.appendChild(row);
     });
@@ -527,51 +844,67 @@
     const modalHTML = `
       <div class="modal-overlay" id="course-modal">
         <div class="modal-content">
-          <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
+          <h3>
+            <i class="fas fa-chart-bar" style="color: ${percentageColor}; margin-right: 0.5rem;"></i>
             ${course.course} - Attendance Details
           </h3>
           
-          <div style="margin-bottom: 20px;">
-            <p><strong>Course Code:</strong> CS${course.id}00</p>
-            <p><strong>Total Classes:</strong> ${course.totalClasses}</p>
-            <p><strong>Present:</strong> ${course.present}</p>
-            <p><strong>Absent:</strong> ${course.absent}</p>
-            <p><strong>Attendance Percentage:</strong> 
-              <span style="color: ${percentageColor}; font-weight: bold;">${course.percentage}%</span>
-            </p>
-            <p><strong>Attendance Status:</strong> 
-              <span style="color: ${percentageColor}; font-weight: bold;">
-                ${course.percentage >= 90 ? 'Excellent' : 
-                  course.percentage >= 80 ? 'Good' : 
-                  course.percentage >= 75 ? 'Satisfactory' : 'Needs Improvement'}
-              </span>
-            </p>
+          <div style="margin-bottom: 25px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Total Classes</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #1a1a2e;">${course.totalClasses}</div>
+              </div>
+              <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Present</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #2ecc71;">${course.present}</div>
+              </div>
+              <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Absent</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: #e74c3c;">${course.absent}</div>
+              </div>
+              <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Percentage</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: ${percentageColor};">${course.percentage}%</div>
+              </div>
+            </div>
           </div>
           
           <div style="margin: 25px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 10px;">Attendance Progress</h4>
-            <div class="progress-bar" style="height: 20px; margin-bottom: 10px;">
-              <div class="progress-fill" style="width: ${course.percentage}%"></div>
+            <h4 style="color: #475569; margin-bottom: 15px; font-size: 1.1rem;">Attendance Progress</h4>
+            <div class="progress-bar" style="height: 16px; margin-bottom: 10px; background: #e2e8f0;">
+              <div class="progress-fill" style="width: ${course.percentage}%; background: linear-gradient(90deg, ${percentageColor} 0%, ${percentageColor}99 100%);"></div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #7f8c8d;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8;">
               <span>0%</span>
               <span>50%</span>
+              <span>75% (Min)</span>
               <span>100%</span>
             </div>
           </div>
           
           <div style="margin: 25px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 10px;">Remarks</h4>
-            <p style="padding: 15px; background: ${course.percentage >= 75 ? '#d5f4e6' : '#f9e79f'}; 
-               border-radius: 8px; border-left: 4px solid ${course.percentage >= 75 ? '#2ecc71' : '#f39c12'};">
-              ${course.percentage >= 90 ? 'Excellent attendance! Keep up the outstanding work.' : 
-                course.percentage >= 80 ? 'Good attendance. You are doing well.' : 
-                course.percentage >= 75 ? 'Satisfactory attendance. Try to improve a bit.' : 
-                'Attendance needs improvement. Please attend more classes regularly.'}
-            </p>
+            <h4 style="color: #475569; margin-bottom: 15px; font-size: 1.1rem;">Remarks</h4>
+            <div style="padding: 1.2rem; background: ${percentageClass === 'high' ? '#d5f4e630' : percentageClass === 'medium' ? '#f9e79f30' : '#fadbd830'}; 
+               border-radius: 12px; border-left: 4px solid ${percentageClass === 'high' ? '#2ecc71' : percentageClass === 'medium' ? '#f39c12' : '#e74c3c'};">
+              <p style="color: #475569; margin-bottom: 0.5rem; font-weight: 600;">
+                ${course.percentage >= 90 ? 'Excellent Attendance!' : 
+                  course.percentage >= 80 ? 'Good Attendance' : 
+                  course.percentage >= 75 ? 'Satisfactory' : 
+                  'Needs Improvement'}
+              </p>
+              <p style="color: #64748b; font-size: 0.95rem;">
+                ${course.percentage >= 90 ? 'You have maintained outstanding attendance. Keep up the excellent work!' : 
+                  course.percentage >= 80 ? 'Your attendance is good. Continue attending classes regularly.' : 
+                  course.percentage >= 75 ? 'You are meeting the minimum requirement. Try to improve your attendance.' : 
+                  'Your attendance is below the required threshold. Please attend more classes to avoid academic penalties.'}
+              </p>
+            </div>
           </div>
           
-          <button class="modal-close-btn" id="close-modal">Close Details</button>
+          <button class="modal-close-btn" id="close-modal">
+            <i class="fas fa-times"></i> Close Details
+          </button>
         </div>
       </div>
     `;
@@ -607,11 +940,11 @@
   // Show notification
   function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    notification.style.background = type === 'success' ? '#2ecc71' : 
-                                   type === 'warning' ? '#f39c12' : 
-                                   type === 'error' ? '#e74c3c' : '#3498db';
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+      <span>${message}</span>
+    `;
     
     document.body.appendChild(notification);
     
@@ -640,7 +973,7 @@
     updateSummaryCards();
     
     // Show notification
-    showNotification(`${course.course} attendance updated! New class marked as present.`);
+    showNotification(`${course.course} attendance updated! New class marked as present.`, 'info');
   }
 
   // Initialize the page
@@ -653,7 +986,7 @@
     backBtn.addEventListener('click', function() {
       // Add loading effect
       const originalText = this.innerHTML;
-      this.innerHTML = 'Loading...';
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
       this.disabled = true;
       
       // Show notification
@@ -677,7 +1010,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        const rows = document.querySelectorAll('tbody tr');
+        const rows = document.querySelectorAll('tbody tr .course-title');
         const currentRow = document.activeElement;
         
         if (rows.length === 0) return;
@@ -712,4 +1045,4 @@
 </script>
 
 </body>
-</html>sa
+</html>
