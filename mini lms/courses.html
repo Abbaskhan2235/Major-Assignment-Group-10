@@ -4,445 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courses - Mini LMS</title>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  body {
-    background-color: #f5f7fa;
-    color: #333;
-    line-height: 1.6;
-  }
-
-  .top-bar {
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    color: white;
-    padding: 20px 30px;
-    font-size: 24px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
-  }
-
-  h2 {
-    color: #2c3e50;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #6a11cb;
-    display: inline-block;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
-  }
-
-  th {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
-    padding: 18px 15px;
-    text-align: left;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  tr {
-    transition: all 0.3s ease;
-  }
-
-  tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-
-  tr:hover {
-    background-color: #f1f5ff;
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  td {
-    padding: 16px 15px;
-    border-bottom: 1px solid #eee;
-    color: #555;
-  }
-
-  .back-btn {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
-    display: flex;
-    align-items: center;
-    margin: 0 auto;
-  }
-
-  .back-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
-  }
-
-  .back-btn:active {
-    transform: translateY(0);
-  }
-
-  .back-btn::before {
-    content: "←";
-    margin-right: 8px;
-    font-size: 18px;
-  }
-
-  .course-actions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .action-btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    font-size: 14px;
-  }
-
-  .view-btn {
-    background: #3498db;
-    color: white;
-  }
-
-  .view-btn:hover {
-    background: #2980b9;
-  }
-
-  .materials-btn {
-    background: #2ecc71;
-    color: white;
-  }
-
-  .materials-btn:hover {
-    background: #27ae60;
-  }
-
-  .drop-btn {
-    background: #e74c3c;
-    color: white;
-  }
-
-  .drop-btn:hover {
-    background: #c0392b;
-  }
-
-  .course-card {
-    display: none;
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    border-left: 5px solid #6a11cb;
-  }
-
-  .filter-container {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    padding: 10px 20px;
-    background: white;
-    border: 2px solid #6a11cb;
-    border-radius: 25px;
-    color: #6a11cb;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .filter-btn.active {
-    background: #6a11cb;
-    color: white;
-  }
-
-  .filter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
-  }
-
-  .search-box {
-    flex-grow: 1;
-    padding: 12px 20px;
-    border: 2px solid #ddd;
-    border-radius: 25px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-    min-width: 250px;
-  }
-
-  .search-box:focus {
-    outline: none;
-    border-color: #6a11cb;
-  }
-
-  /* Modal Styles */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    animation: slideIn 0.3s ease;
-  }
-
-  .modal-close-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
-    margin-top: 15px;
-  }
-
-  .modal-close-btn:hover {
-    background: #c0392b;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  @keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    table {
-      display: block;
-      overflow-x: auto;
-    }
-    
-    .top-bar {
-      font-size: 20px;
-      text-align: center;
-      padding: 15px;
-    }
-    
-    .container {
-      padding: 0 15px;
-    }
-    
-    .course-actions {
-      flex-direction: column;
-    }
-    
-    .filter-container {
-      flex-direction: column;
-    }
-    
-    .search-box {
-      min-width: 100%;
-    }
-  }
-
-  /* Animation for table rows */
-  @keyframes fadeInRow {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  tr {
-    animation: fadeInRow 0.5s ease forwards;
-  }
-
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #2ecc71;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    z-index: 1001;
-    animation: slideInRight 0.5s ease;
-  }
-
-  .notification.error {
-    background: #e74c3c;
-  }
-
-  .notification.warning {
-    background: #f39c12;
-  }
-
-  .notification.info {
-    background: #3498db;
-  }
-
-  .stats-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-
-  .stat-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    flex: 1;
-    min-width: 150px;
-    text-align: center;
-    border-top: 4px solid #6a11cb;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  }
-
-  .stat-card .value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #6a11cb;
-  }
-
-  .stat-card .label {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin-top: 5px;
-  }
-</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<div class="top-bar">My Courses</div>
+<div class="top-bar">
+  <div class="top-bar-content">
+    <i class="fas fa-graduation-cap"></i>
+    <h1>My Courses</h1>
+    <div class="user-info">
+      <img src="https://ui-avatars.com/api/?name=Student+Name&background=6a11cb&color=fff" alt="User Avatar">
+      <span>Welcome, Student</span>
+    </div>
+  </div>
+</div>
 
 <div class="container">
-  <h2>Enrolled Courses</h2>
+  <div class="header-section">
+    <h2>Enrolled Courses</h2>
+    <div class="header-actions">
+      <button id="toggle-view" class="toggle-view-btn">
+        <i class="fas fa-th"></i> Switch to Card View
+      </button>
+      <button id="add-course-btn" class="add-course-btn">
+        <i class="fas fa-plus"></i> Add Course
+      </button>
+    </div>
+  </div>
 
   <!-- Statistics -->
   <div class="stats-container">
     <div class="stat-card">
-      <div class="value" id="total-courses">3</div>
+      <div class="stat-icon">
+        <i class="fas fa-book-open"></i>
+      </div>
+      <div class="value" id="total-courses">5</div>
       <div class="label">Total Courses</div>
+      <div class="stat-change">+2 from last term</div>
     </div>
     <div class="stat-card">
-      <div class="value" id="cs-courses">2</div>
+      <div class="stat-icon">
+        <i class="fas fa-laptop-code"></i>
+      </div>
+      <div class="value" id="cs-courses">3</div>
       <div class="label">CS Courses</div>
+      <div class="stat-change">Most enrolled</div>
     </div>
     <div class="stat-card">
-      <div class="value" id="other-courses">1</div>
+      <div class="stat-icon">
+        <i class="fas fa-globe"></i>
+      </div>
+      <div class="value" id="other-courses">2</div>
       <div class="label">Other Courses</div>
+      <div class="stat-change">Well-rounded</div>
     </div>
     <div class="stat-card">
-      <div class="value" id="credits-hours">9</div>
+      <div class="stat-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="value" id="credits-hours">16</div>
       <div class="label">Credit Hours</div>
+      <div class="stat-change">Full-time load</div>
     </div>
   </div>
 
   <!-- Filter and Search -->
   <div class="filter-container">
-    <input type="text" class="search-box" id="search-courses" placeholder="Search courses by name or code...">
-    <button class="filter-btn active" data-filter="all">All Courses</button>
-    <button class="filter-btn" data-filter="cs">CS Courses</button>
-    <button class="filter-btn" data-filter="eng">ENG Courses</button>
-    <button class="filter-btn" data-filter="active">Active</button>
+    <div class="search-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" class="search-box" id="search-courses" placeholder="Search courses by name, code, or teacher...">
+      <button class="search-clear" id="clear-search">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-filter="all">
+        <i class="fas fa-layer-group"></i> All Courses
+      </button>
+      <button class="filter-btn" data-filter="cs">
+        <i class="fas fa-laptop-code"></i> CS Courses
+      </button>
+      <button class="filter-btn" data-filter="eng">
+        <i class="fas fa-language"></i> ENG Courses
+      </button>
+      <button class="filter-btn" data-filter="active">
+        <i class="fas fa-play-circle"></i> Active
+      </button>
+      <button class="filter-btn" data-filter="completed">
+        <i class="fas fa-check-circle"></i> Completed
+      </button>
+    </div>
+    
+    <div class="sort-container">
+      <span>Sort by:</span>
+      <select id="sort-courses" class="sort-select">
+        <option value="code">Course Code</option>
+        <option value="title">Course Title</option>
+        <option value="credits">Credits</option>
+        <option value="status">Status</option>
+      </select>
+    </div>
   </div>
 
   <!-- Course Cards View (Hidden by default) -->
-  <div id="course-cards-view"></div>
+  <div id="course-cards-view" class="cards-container"></div>
 
   <!-- Table View -->
-  <table id="courses-table">
-    <thead>
-      <tr>
-        <th>Course Code</th>
-        <th>Course Title</th>
-        <th>Teacher</th>
-        <th>Schedule</th>
-        <th>Credits</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="courses-table-body">
-      <!-- Table rows will be populated by JavaScript -->
-    </tbody>
-  </table>
-
-  <div style="text-align: center; margin: 20px 0;">
-    <button id="toggle-view" class="action-btn" style="background: #9b59b6; color: white; padding: 10px 20px;">
-      Switch to Card View
-    </button>
+  <div class="table-container">
+    <table id="courses-table">
+      <thead>
+        <tr>
+          <th>
+            <span>Course Code</span>
+            <i class="fas fa-sort" data-sort="code"></i>
+          </th>
+          <th>
+            <span>Course Title</span>
+            <i class="fas fa-sort" data-sort="title"></i>
+          </th>
+          <th>
+            <span>Teacher</span>
+            <i class="fas fa-sort" data-sort="teacher"></i>
+          </th>
+          <th>
+            <span>Schedule</span>
+          </th>
+          <th>
+            <span>Credits</span>
+            <i class="fas fa-sort" data-sort="credits"></i>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="courses-table-body">
+        <!-- Table rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+    
+    <div class="table-footer">
+      <div class="showing-text" id="showing-text">
+        Showing <span id="showing-count">5</span> of <span id="total-count">5</span> courses
+      </div>
+      <div class="pagination" id="pagination">
+        <!-- Pagination will be populated by JavaScript -->
+      </div>
+    </div>
   </div>
 
-  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
+  <button class="back-btn" id="back-to-dashboard">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </button>
 
 </div>
+
+<!-- Notification Container -->
+<div id="notification-container"></div>
 
 <script>
   // Course data
@@ -456,9 +175,11 @@
       credits: 3,
       department: "cs",
       status: "active",
-      description: "Learn the fundamentals of programming using Python. This course covers variables, loops, functions, and basic algorithms.",
-      materials: ["Syllabus.pdf", "Lecture1.pptx", "Assignment1.pdf"],
-      grade: "A-"
+      description: "Learn the fundamentals of programming using Python. This course covers variables, loops, functions, and basic algorithms. Perfect for beginners with no prior experience.",
+      materials: ["Syllabus.pdf", "Lecture1.pptx", "Assignment1.pdf", "Python_Setup.pdf"],
+      grade: "A-",
+      progress: 85,
+      color: "#6a11cb"
     },
     { 
       id: 2,
@@ -469,9 +190,11 @@
       credits: 3,
       department: "cs",
       status: "active",
-      description: "Study of fundamental data structures including arrays, linked lists, stacks, queues, and trees.",
-      materials: ["Syllabus.pdf", "DS_Notes.pdf", "Lab1.pdf"],
-      grade: "B+"
+      description: "Study of fundamental data structures including arrays, linked lists, stacks, queues, and trees. Implementation and analysis of algorithms for each structure.",
+      materials: ["Syllabus.pdf", "DS_Notes.pdf", "Lab1.pdf", "Assignment2.zip"],
+      grade: "B+",
+      progress: 70,
+      color: "#2575fc"
     },
     { 
       id: 3,
@@ -482,9 +205,11 @@
       credits: 3,
       department: "eng",
       status: "active",
-      description: "Develop effective written and oral communication skills for academic and professional contexts.",
-      materials: ["Syllabus.pdf", "WritingGuide.pdf", "PresentationTips.pdf"],
-      grade: "A"
+      description: "Develop effective written and oral communication skills for academic and professional contexts. Focus on presentation, technical writing, and interpersonal communication.",
+      materials: ["Syllabus.pdf", "WritingGuide.pdf", "PresentationTips.pdf", "Sample_Essays.zip"],
+      grade: "A",
+      progress: 95,
+      color: "#e74c3c"
     },
     { 
       id: 4,
@@ -495,9 +220,11 @@
       credits: 4,
       department: "math",
       status: "completed",
-      description: "Advanced topics in calculus including integration techniques and series.",
-      materials: ["Syllabus.pdf", "FormulaSheet.pdf"],
-      grade: "B"
+      description: "Advanced topics in calculus including integration techniques, series, and multivariable calculus. Applications in physics and engineering problems.",
+      materials: ["Syllabus.pdf", "FormulaSheet.pdf", "PastPapers.zip"],
+      grade: "B",
+      progress: 100,
+      color: "#f39c12"
     },
     { 
       id: 5,
@@ -508,9 +235,11 @@
       credits: 3,
       department: "cs",
       status: "active",
-      description: "Learn object-oriented programming concepts using Java.",
-      materials: ["Syllabus.pdf", "OOP_Notes.pdf"],
-      grade: "In Progress"
+      description: "Learn object-oriented programming concepts using Java. Topics include classes, objects, inheritance, polymorphism, and design patterns.",
+      materials: ["Syllabus.pdf", "OOP_Notes.pdf", "Java_Setup.pdf", "Project1.zip"],
+      grade: "In Progress",
+      progress: 60,
+      color: "#2ecc71"
     }
   ];
 
@@ -521,17 +250,43 @@
   const toggleViewBtn = document.getElementById('toggle-view');
   const searchBox = document.getElementById('search-courses');
   const filterBtns = document.querySelectorAll('.filter-btn');
+  const sortSelect = document.getElementById('sort-courses');
+  const clearSearchBtn = document.getElementById('clear-search');
+  const addCourseBtn = document.getElementById('add-course-btn');
   
   // Statistics elements
   const totalCoursesEl = document.getElementById('total-courses');
   const csCoursesEl = document.getElementById('cs-courses');
   const otherCoursesEl = document.getElementById('other-courses');
   const creditsHoursEl = document.getElementById('credits-hours');
+  const showingCountEl = document.getElementById('showing-count');
+  const totalCountEl = document.getElementById('total-count');
+  const paginationEl = document.getElementById('pagination');
 
   // Current view state
   let currentView = 'table';
   let currentFilter = 'all';
   let currentSearch = '';
+  let currentSort = 'code';
+  let currentPage = 1;
+  const coursesPerPage = 4;
+
+  // Initialize the page
+  function init() {
+    // Update statistics
+    updateStatistics();
+    
+    // Populate initial table view
+    populateTableView();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Show welcome message
+    setTimeout(() => {
+      showNotification('Courses page loaded successfully. Click on any course for details!', 'success');
+    }, 800);
+  }
 
   // Update statistics
   function updateStatistics() {
@@ -546,7 +301,94 @@
     creditsHoursEl.textContent = totalCredits;
   }
 
-  // Get filtered courses based on current filter and search
+  // Setup all event listeners
+  function setupEventListeners() {
+    // Back button functionality
+    backBtn.addEventListener('click', function() {
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+      this.disabled = true;
+      
+      showNotification('Returning to Dashboard...', 'info');
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.disabled = false;
+        // In real app: window.location.href = 'dashboard.html';
+        showNotification('Dashboard navigation simulated.', 'info');
+      }, 1500);
+    });
+    
+    // Toggle view button
+    toggleViewBtn.addEventListener('click', toggleView);
+    
+    // Search functionality
+    searchBox.addEventListener('input', function() {
+      currentSearch = this.value;
+      currentPage = 1;
+      currentView === 'table' ? populateTableView() : populateCardView();
+    });
+    
+    // Clear search button
+    clearSearchBtn.addEventListener('click', function() {
+      searchBox.value = '';
+      currentSearch = '';
+      currentPage = 1;
+      currentView === 'table' ? populateTableView() : populateCardView();
+    });
+    
+    // Filter buttons
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active state
+        filterBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update filter
+        currentFilter = this.getAttribute('data-filter');
+        currentPage = 1;
+        currentView === 'table' ? populateTableView() : populateCardView();
+      });
+    });
+    
+    // Sort select
+    sortSelect.addEventListener('change', function() {
+      currentSort = this.value;
+      currentView === 'table' ? populateTableView() : populateCardView();
+    });
+    
+    // Add course button
+    addCourseBtn.addEventListener('click', showAddCourseModal);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + F to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchBox.focus();
+      }
+      
+      // Ctrl/Cmd + T to toggle view
+      if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+        e.preventDefault();
+        toggleView();
+      }
+      
+      // Escape to close modals
+      if (e.key === 'Escape') {
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+      }
+      
+      // Ctrl/Cmd + N to add course
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        showAddCourseModal();
+      }
+    });
+  }
+
+  // Get filtered and sorted courses based on current filter, search, and sort
   function getFilteredCourses() {
     let filtered = [...coursesData];
     
@@ -556,7 +398,8 @@
       filtered = filtered.filter(course => 
         course.code.toLowerCase().includes(searchLower) ||
         course.title.toLowerCase().includes(searchLower) ||
-        course.teacher.toLowerCase().includes(searchLower)
+        course.teacher.toLowerCase().includes(searchLower) ||
+        course.description.toLowerCase().includes(searchLower)
       );
     }
     
@@ -568,58 +411,125 @@
         filtered = filtered.filter(course => course.department === 'eng');
       } else if (currentFilter === 'active') {
         filtered = filtered.filter(course => course.status === 'active');
+      } else if (currentFilter === 'completed') {
+        filtered = filtered.filter(course => course.status === 'completed');
       }
     }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      if (currentSort === 'code') {
+        return a.code.localeCompare(b.code);
+      } else if (currentSort === 'title') {
+        return a.title.localeCompare(b.title);
+      } else if (currentSort === 'credits') {
+        return b.credits - a.credits;
+      } else if (currentSort === 'status') {
+        return a.status.localeCompare(b.status);
+      }
+      return 0;
+    });
     
     return filtered;
   }
 
+  // Get paginated courses
+  function getPaginatedCourses(courses) {
+    const startIndex = (currentPage - 1) * coursesPerPage;
+    const endIndex = startIndex + coursesPerPage;
+    return courses.slice(startIndex, endIndex);
+  }
+
   // Create and populate table rows
   function populateTableView() {
-    const filteredCourses = getFilteredCourses();
+    const allFilteredCourses = getFilteredCourses();
+    const paginatedCourses = getPaginatedCourses(allFilteredCourses);
     tableBody.innerHTML = '';
     
-    if (filteredCourses.length === 0) {
+    // Update showing count
+    showingCountEl.textContent = paginatedCourses.length;
+    totalCountEl.textContent = allFilteredCourses.length;
+    
+    if (paginatedCourses.length === 0) {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td colspan="6" style="text-align: center; padding: 40px; color: #7f8c8d;">
-          No courses found matching your criteria.
+        <td colspan="6" class="no-results">
+          <div class="no-results-content">
+            <i class="fas fa-search"></i>
+            <h3>No courses found</h3>
+            <p>Try adjusting your search or filter to find what you're looking for.</p>
+          </div>
         </td>
       `;
       tableBody.appendChild(row);
+      generatePagination(allFilteredCourses.length);
       return;
     }
     
-    filteredCourses.forEach((course, index) => {
+    paginatedCourses.forEach((course, index) => {
       const row = document.createElement('tr');
-      row.style.animationDelay = `${index * 0.1}s`;
+      row.style.animationDelay = `${index * 0.05}s`;
       
-      // Determine status color
+      // Determine status color and icon
       const statusClass = course.status === 'active' ? 'active-course' : 'completed-course';
+      const statusIcon = course.status === 'active' ? 'fas fa-play-circle' : 'fas fa-check-circle';
       const statusColor = course.status === 'active' ? '#2ecc71' : '#95a5a6';
       
       row.innerHTML = `
         <td>
-          <strong style="color: #6a11cb;">${course.code}</strong>
-          <div style="font-size: 12px; color: ${statusColor};">${course.status}</div>
+          <div class="course-code-cell">
+            <span class="course-code" style="color: ${course.color};">${course.code}</span>
+            <div class="course-status" style="color: ${statusColor};">
+              <i class="${statusIcon}"></i> ${course.status}
+            </div>
+          </div>
         </td>
         <td>
-          <div style="font-weight: 600;">${course.title}</div>
-          <div style="font-size: 14px; color: #7f8c8d;">${course.description.substring(0, 60)}...</div>
-        </td>
-        <td>${course.teacher}</td>
-        <td>
-          <div>${course.schedule}</div>
-          <div style="font-size: 12px; color: #7f8c8d;">${course.credits} credits</div>
+          <div class="course-title-cell">
+            <div class="course-title">${course.title}</div>
+            <div class="course-description">${course.description.substring(0, 70)}...</div>
+          </div>
         </td>
         <td>
-          <div style="font-weight: 600; color: #6a11cb;">${course.credits}</div>
+          <div class="teacher-cell">
+            <div class="teacher-avatar">
+              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(course.teacher)}&background=6a11cb&color=fff" alt="${course.teacher}">
+            </div>
+            <div class="teacher-name">${course.teacher}</div>
+          </div>
+        </td>
+        <td>
+          <div class="schedule-cell">
+            <i class="fas fa-calendar-alt"></i>
+            <div>${course.schedule}</div>
+            <div class="credits-badge">${course.credits} credits</div>
+          </div>
+        </td>
+        <td>
+          <div class="credits-cell">
+            <div class="credits-value">${course.credits}</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${course.progress}%; background: ${course.color};"></div>
+            </div>
+            <div class="progress-text">${course.progress}% complete</div>
+          </div>
         </td>
         <td>
           <div class="course-actions">
-            <button class="action-btn view-btn" data-course-id="${course.id}">View</button>
-            <button class="action-btn materials-btn" data-course-id="${course.id}">Materials</button>
-            ${course.status === 'active' ? `<button class="action-btn drop-btn" data-course-id="${course.id}">Drop</button>` : ''}
+            <button class="action-btn view-btn" data-course-id="${course.id}" title="View Details">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-btn materials-btn" data-course-id="${course.id}" title="Course Materials">
+              <i class="fas fa-folder"></i>
+            </button>
+            <button class="action-btn grade-btn" data-course-id="${course.id}" title="View Grade">
+              <i class="fas fa-chart-line"></i>
+            </button>
+            ${course.status === 'active' ? `
+              <button class="action-btn drop-btn" data-course-id="${course.id}" title="Drop Course">
+                <i class="fas fa-times"></i>
+              </button>
+            ` : ''}
           </div>
         </td>
       `;
@@ -628,148 +538,243 @@
     });
     
     // Add event listeners to action buttons
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const courseId = parseInt(btn.getAttribute('data-course-id'));
-        const course = coursesData.find(c => c.id === courseId);
-        showCourseDetails(course);
-      });
-    });
-    
-    document.querySelectorAll('.materials-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const courseId = parseInt(btn.getAttribute('data-course-id'));
-        const course = coursesData.find(c => c.id === courseId);
-        showCourseMaterials(course);
-      });
-    });
-    
-    document.querySelectorAll('.drop-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const courseId = parseInt(btn.getAttribute('data-course-id'));
-        const course = coursesData.find(c => c.id === courseId);
-        showDropConfirmation(course);
-      });
-    });
+    addActionButtonListeners();
     
     // Make rows clickable
     document.querySelectorAll('tbody tr').forEach(row => {
-      row.addEventListener('click', function() {
-        const courseCode = this.querySelector('td:first-child strong').textContent;
-        const course = coursesData.find(c => c.code === courseCode);
-        if (course) showCourseDetails(course);
-      });
-      row.style.cursor = 'pointer';
+      if (!row.classList.contains('no-results')) {
+        row.addEventListener('click', function(e) {
+          // Don't trigger if clicking on an action button
+          if (!e.target.closest('.course-actions')) {
+            const courseId = this.querySelector('.view-btn').getAttribute('data-course-id');
+            const course = coursesData.find(c => c.id === parseInt(courseId));
+            if (course) showCourseDetails(course);
+          }
+        });
+        row.style.cursor = 'pointer';
+      }
     });
+    
+    // Generate pagination
+    generatePagination(allFilteredCourses.length);
   }
 
   // Create and populate card view
   function populateCardView() {
-    const filteredCourses = getFilteredCourses();
+    const allFilteredCourses = getFilteredCourses();
+    const paginatedCourses = getPaginatedCourses(allFilteredCourses);
     courseCardsView.innerHTML = '';
     
-    if (filteredCourses.length === 0) {
+    // Update showing count
+    showingCountEl.textContent = paginatedCourses.length;
+    totalCountEl.textContent = allFilteredCourses.length;
+    
+    if (paginatedCourses.length === 0) {
       courseCardsView.innerHTML = `
-        <div style="text-align: center; padding: 40px; color: #7f8c8d; background: white; border-radius: 10px;">
-          No courses found matching your criteria.
+        <div class="no-results-card">
+          <div class="no-results-content">
+            <i class="fas fa-search"></i>
+            <h3>No courses found</h3>
+            <p>Try adjusting your search or filter to find what you're looking for.</p>
+          </div>
         </div>
       `;
+      generatePagination(allFilteredCourses.length);
       return;
     }
     
-    filteredCourses.forEach((course, index) => {
+    courseCardsView.innerHTML = '<div class="cards-grid"></div>';
+    const cardsGrid = courseCardsView.querySelector('.cards-grid');
+    
+    paginatedCourses.forEach((course, index) => {
       const card = document.createElement('div');
       card.className = 'course-card';
-      card.style.animationDelay = `${index * 0.1}s`;
-      card.style.display = 'block';
+      card.style.animationDelay = `${index * 0.05}s`;
       
       // Determine status color
       const statusColor = course.status === 'active' ? '#2ecc71' : '#95a5a6';
-      const borderColor = course.department === 'cs' ? '#6a11cb' : 
-                         course.department === 'eng' ? '#e74c3c' : 
-                         course.department === 'math' ? '#f39c12' : '#3498db';
+      const progressColor = course.color;
       
       card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-          <div>
-            <h3 style="color: ${borderColor}; margin-bottom: 5px;">${course.code}: ${course.title}</h3>
-            <div style="color: #7f8c8d; margin-bottom: 10px;">${course.teacher}</div>
-          </div>
-          <div style="background: ${statusColor}; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
+        <div class="course-card-header" style="background: linear-gradient(135deg, ${course.color}20, ${course.color}40); border-left: 4px solid ${course.color};">
+          <div class="course-card-code" style="color: ${course.color};">${course.code}</div>
+          <div class="course-card-status" style="background: ${statusColor}20; color: ${statusColor};">
+            <i class="fas ${course.status === 'active' ? 'fa-play-circle' : 'fa-check-circle'}"></i>
             ${course.status}
           </div>
         </div>
         
-        <div style="margin-bottom: 15px; color: #555;">
-          ${course.description}
+        <div class="course-card-body">
+          <h3 class="course-card-title">${course.title}</h3>
+          <div class="course-card-teacher">
+            <div class="teacher-avatar">
+              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(course.teacher)}&background=6a11cb&color=fff" alt="${course.teacher}">
+            </div>
+            <div class="teacher-name">${course.teacher}</div>
+          </div>
+          
+          <p class="course-card-description">${course.description}</p>
+          
+          <div class="course-card-meta">
+            <div class="meta-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>${course.schedule}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-clock"></i>
+              <span>${course.credits} credits</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-chart-line"></i>
+              <span>${course.grade}</span>
+            </div>
+          </div>
+          
+          <div class="course-progress">
+            <div class="progress-info">
+              <span>Course Progress</span>
+              <span>${course.progress}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${course.progress}%; background: ${progressColor};"></div>
+            </div>
+          </div>
         </div>
         
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px;">
-          <div>
-            <strong>Schedule:</strong> ${course.schedule}
-          </div>
-          <div>
-            <strong>Credits:</strong> ${course.credits}
-          </div>
-          <div>
-            <strong>Grade:</strong> ${course.grade}
-          </div>
-        </div>
-        
-        <div class="course-actions">
-          <button class="action-btn view-btn" data-course-id="${course.id}">View Details</button>
-          <button class="action-btn materials-btn" data-course-id="${course.id}">Course Materials</button>
-          ${course.status === 'active' ? `<button class="action-btn drop-btn" data-course-id="${course.id}">Drop Course</button>` : ''}
+        <div class="course-card-footer">
+          <button class="card-action-btn view-btn" data-course-id="${course.id}">
+            <i class="fas fa-eye"></i> Details
+          </button>
+          <button class="card-action-btn materials-btn" data-course-id="${course.id}">
+            <i class="fas fa-folder"></i> Materials
+          </button>
+          ${course.status === 'active' ? `
+            <button class="card-action-btn drop-btn" data-course-id="${course.id}">
+              <i class="fas fa-times"></i> Drop
+            </button>
+          ` : ''}
         </div>
       `;
       
-      courseCardsView.appendChild(card);
+      cardsGrid.appendChild(card);
     });
     
     // Add event listeners to action buttons
+    addActionButtonListeners();
+    
+    // Generate pagination
+    generatePagination(allFilteredCourses.length);
+  }
+
+  // Add event listeners to action buttons
+  function addActionButtonListeners() {
+    // View buttons
     document.querySelectorAll('.view-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const courseId = parseInt(btn.getAttribute('data-course-id'));
         const course = coursesData.find(c => c.id === courseId);
         showCourseDetails(course);
       });
     });
     
+    // Materials buttons
     document.querySelectorAll('.materials-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const courseId = parseInt(btn.getAttribute('data-course-id'));
         const course = coursesData.find(c => c.id === courseId);
         showCourseMaterials(course);
       });
     });
     
+    // Drop buttons
     document.querySelectorAll('.drop-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const courseId = parseInt(btn.getAttribute('data-course-id'));
         const course = coursesData.find(c => c.id === courseId);
         showDropConfirmation(course);
       });
     });
+    
+    // Grade buttons (if any)
+    document.querySelectorAll('.grade-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const courseId = parseInt(btn.getAttribute('data-course-id'));
+        const course = coursesData.find(c => c.id === courseId);
+        showGradeDetails(course);
+      });
+    });
+  }
+
+  // Generate pagination
+  function generatePagination(totalCourses) {
+    const totalPages = Math.ceil(totalCourses / coursesPerPage);
+    paginationEl.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'pagination-btn' + (currentPage === 1 ? ' disabled' : '');
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        currentView === 'table' ? populateTableView() : populateCardView();
+      }
+    });
+    paginationEl.appendChild(prevBtn);
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+      pageBtn.textContent = i;
+      pageBtn.addEventListener('click', () => {
+        currentPage = i;
+        currentView === 'table' ? populateTableView() : populateCardView();
+      });
+      paginationEl.appendChild(pageBtn);
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'pagination-btn' + (currentPage === totalPages ? ' disabled' : '');
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        currentView === 'table' ? populateTableView() : populateCardView();
+      }
+    });
+    paginationEl.appendChild(nextBtn);
   }
 
   // Toggle between table and card view
   function toggleView() {
     if (currentView === 'table') {
       currentView = 'card';
-      document.getElementById('courses-table').style.display = 'none';
+      document.querySelector('.table-container').style.display = 'none';
       courseCardsView.style.display = 'block';
       populateCardView();
-      toggleViewBtn.textContent = 'Switch to Table View';
+      toggleViewBtn.innerHTML = '<i class="fas fa-list"></i> Switch to Table View';
     } else {
       currentView = 'table';
-      document.getElementById('courses-table').style.display = 'table';
+      document.querySelector('.table-container').style.display = 'block';
       courseCardsView.style.display = 'none';
       populateTableView();
-      toggleViewBtn.textContent = 'Switch to Card View';
+      toggleViewBtn.innerHTML = '<i class="fas fa-th"></i> Switch to Card View';
     }
+    
+    // Add animation class
+    const container = currentView === 'table' ? document.querySelector('.table-container') : courseCardsView;
+    container.classList.add('view-transition');
+    setTimeout(() => {
+      container.classList.remove('view-transition');
+    }, 500);
   }
 
   // Show course details modal
@@ -777,32 +782,93 @@
     const modalHTML = `
       <div class="modal-overlay" id="course-modal">
         <div class="modal-content">
-          <h3 style="color: #2c3e50; margin-bottom: 10px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
-            ${course.code}: ${course.title}
-          </h3>
-          
-          <div style="margin-bottom: 20px;">
-            <p><strong>Instructor:</strong> ${course.teacher}</p>
-            <p><strong>Schedule:</strong> ${course.schedule}</p>
-            <p><strong>Credit Hours:</strong> ${course.credits}</p>
-            <p><strong>Department:</strong> ${course.department.toUpperCase()}</p>
-            <p><strong>Status:</strong> <span style="color: ${course.status === 'active' ? '#2ecc71' : '#95a5a6'}">${course.status}</span></p>
-            <p><strong>Current Grade:</strong> <span style="font-weight: bold;">${course.grade}</span></p>
+          <div class="modal-header" style="border-bottom-color: ${course.color}">
+            <h3 class="modal-title">
+              <span class="course-code-badge" style="background: ${course.color}">${course.code}</span>
+              ${course.title}
+            </h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
           
-          <div style="margin: 20px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 10px;">Course Description</h4>
-            <p style="line-height: 1.6;">${course.description}</p>
+          <div class="modal-body">
+            <div class="course-info-grid">
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-chalkboard-teacher"></i> Instructor</div>
+                <div class="info-value">${course.teacher}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-calendar-alt"></i> Schedule</div>
+                <div class="info-value">${course.schedule}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-clock"></i> Credit Hours</div>
+                <div class="info-value">${course.credits}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-university"></i> Department</div>
+                <div class="info-value">${course.department.toUpperCase()}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-chart-line"></i> Current Grade</div>
+                <div class="info-value grade-value">${course.grade}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label"><i class="fas fa-tasks"></i> Status</div>
+                <div class="info-value">
+                  <span class="status-badge" style="background: ${course.status === 'active' ? '#2ecc7120' : '#95a5a620'}; color: ${course.status === 'active' ? '#2ecc71' : '#95a5a6'}">
+                    <i class="fas ${course.status === 'active' ? 'fa-play-circle' : 'fa-check-circle'}"></i>
+                    ${course.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="course-description-section">
+              <h4><i class="fas fa-align-left"></i> Course Description</h4>
+              <p>${course.description}</p>
+            </div>
+            
+            <div class="course-progress-section">
+              <h4><i class="fas fa-chart-bar"></i> Course Progress</h4>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${course.progress}%; background: ${course.color};"></div>
+                </div>
+                <div class="progress-text">${course.progress}% Complete</div>
+              </div>
+            </div>
+            
+            <div class="course-materials-section">
+              <h4><i class="fas fa-folder-open"></i> Course Materials (${course.materials.length})</h4>
+              <div class="materials-list">
+                ${course.materials.map((material, index) => `
+                  <div class="material-item">
+                    <div class="material-icon">
+                      <i class="fas fa-file-${material.endsWith('.pdf') ? 'pdf' : material.endsWith('.zip') ? 'archive' : 'powerpoint'}"></i>
+                    </div>
+                    <div class="material-info">
+                      <div class="material-name">${material}</div>
+                      <div class="material-meta">Uploaded: ${index === 0 ? '2 days ago' : index === 1 ? '1 week ago' : '2 weeks ago'}</div>
+                    </div>
+                    <button class="material-download-btn" onclick="downloadMaterial('${material}')">
+                      <i class="fas fa-download"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
           </div>
           
-          <div style="margin: 20px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 10px;">Course Materials (${course.materials.length})</h4>
-            <ul style="padding-left: 20px;">
-              ${course.materials.map(material => `<li>${material}</li>`).join('')}
-            </ul>
+          <div class="modal-footer">
+            <button class="modal-action-btn secondary-btn" id="close-modal-2">
+              Close
+            </button>
+            <button class="modal-action-btn primary-btn" onclick="showCourseMaterials(${JSON.stringify(course).replace(/"/g, '&quot;')})">
+              <i class="fas fa-folder-open"></i> View All Materials
+            </button>
           </div>
-          
-          <button class="modal-close-btn" id="close-modal">Close</button>
         </div>
       </div>
     `;
@@ -816,37 +882,73 @@
     const modalHTML = `
       <div class="modal-overlay" id="materials-modal">
         <div class="modal-content">
-          <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
-            Course Materials: ${course.code}
-          </h3>
-          
-          <div style="margin-bottom: 20px;">
-            <p><strong>Course:</strong> ${course.title}</p>
-            <p><strong>Instructor:</strong> ${course.teacher}</p>
+          <div class="modal-header" style="border-bottom-color: ${course.color}">
+            <h3 class="modal-title">
+              <i class="fas fa-folder"></i> Course Materials: ${course.code}
+            </h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
           
-          <div style="margin: 20px 0;">
-            <h4 style="color: #2c3e50; margin-bottom: 15px;">Available Materials</h4>
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px;">
+          <div class="modal-body">
+            <div class="course-info-banner" style="background: linear-gradient(135deg, ${course.color}15, ${course.color}30);">
+              <div class="banner-content">
+                <h4>${course.title}</h4>
+                <p>Instructor: ${course.teacher}</p>
+              </div>
+              <div class="banner-icon">
+                <i class="fas fa-book-reader"></i>
+              </div>
+            </div>
+            
+            <div class="materials-header">
+              <h4><i class="fas fa-file-alt"></i> Available Materials (${course.materials.length})</h4>
+              <button class="download-all-btn" onclick="downloadAllMaterials(${course.id})">
+                <i class="fas fa-download"></i> Download All
+              </button>
+            </div>
+            
+            <div class="materials-table">
               ${course.materials.map((material, index) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-                  <div>
-                    <span style="font-weight: 600;">${material}</span>
-                    <div style="font-size: 12px; color: #7f8c8d;">Uploaded: ${index === 0 ? '2 days ago' : '1 week ago'}</div>
+                <div class="material-row">
+                  <div class="material-info">
+                    <div class="material-icon">
+                      <i class="fas fa-file-${material.endsWith('.pdf') ? 'pdf' : material.endsWith('.zip') ? 'archive' : material.endsWith('.pptx') ? 'powerpoint' : 'alt'}"></i>
+                    </div>
+                    <div>
+                      <div class="material-name">${material}</div>
+                      <div class="material-meta">
+                        <span><i class="fas fa-calendar"></i> Uploaded: ${index === 0 ? '2 days ago' : index === 1 ? '1 week ago' : '2 weeks ago'}</span>
+                        <span><i class="fas fa-file"></i> ${material.endsWith('.zip') ? 'ZIP Archive' : material.endsWith('.pdf') ? 'PDF Document' : 'Presentation'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <button class="action-btn view-btn" onclick="downloadMaterial('${material}')" style="font-size: 12px; padding: 5px 10px;">
-                    Download
-                  </button>
+                  <div class="material-actions">
+                    <button class="action-btn preview-btn" onclick="previewMaterial('${material}')" title="Preview">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn download-btn" onclick="downloadMaterial('${material}')" title="Download">
+                      <i class="fas fa-download"></i>
+                    </button>
+                  </div>
                 </div>
               `).join('')}
             </div>
+            
+            <div class="note-box">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Note:</strong> All materials are for educational purposes only. Please respect copyright laws.
+              </div>
+            </div>
           </div>
           
-          <div style="margin: 20px 0; padding: 15px; background: #e8f4fc; border-radius: 8px; border-left: 4px solid #3498db;">
-            <strong>Note:</strong> All materials are for educational purposes only. Please respect copyright laws.
+          <div class="modal-footer">
+            <button class="modal-action-btn secondary-btn" id="close-modal-2">
+              Close
+            </button>
           </div>
-          
-          <button class="modal-close-btn" id="close-modal">Close</button>
         </div>
       </div>
     `;
@@ -859,27 +961,58 @@
   function showDropConfirmation(course) {
     const modalHTML = `
       <div class="modal-overlay" id="drop-modal">
-        <div class="modal-content">
-          <h3 style="color: #e74c3c; margin-bottom: 20px; border-bottom: 2px solid #e74c3c; padding-bottom: 10px;">
-            Drop Course Confirmation
-          </h3>
-          
-          <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 72px; color: #e74c3c; margin-bottom: 20px;">⚠️</div>
-            <p style="font-size: 18px; margin-bottom: 10px;">
-              Are you sure you want to drop <strong>${course.code}: ${course.title}</strong>?
-            </p>
-            <p style="color: #7f8c8d;">
-              This action cannot be undone. You will lose access to all course materials and assignments.
-            </p>
+        <div class="modal-content warning-modal">
+          <div class="modal-header" style="border-bottom-color: #e74c3c">
+            <h3 class="modal-title">
+              <i class="fas fa-exclamation-triangle"></i> Drop Course Confirmation
+            </h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
           
-          <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-            <button id="confirm-drop" class="action-btn drop-btn" style="padding: 12px 24px;">
-              Yes, Drop Course
-            </button>
-            <button id="cancel-drop" class="action-btn view-btn" style="padding: 12px 24px;">
+          <div class="modal-body" style="text-align: center;">
+            <div class="warning-icon">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            
+            <h3 style="color: #e74c3c; margin-bottom: 10px;">
+              Drop ${course.code}: ${course.title}?
+            </h3>
+            
+            <p style="margin-bottom: 20px; color: #555;">
+              You are about to drop <strong>${course.code}: ${course.title}</strong>. This action cannot be undone.
+            </p>
+            
+            <div class="warning-details">
+              <div class="warning-item">
+                <i class="fas fa-ban"></i>
+                <div>You will lose access to all course materials and assignments</div>
+              </div>
+              <div class="warning-item">
+                <i class="fas fa-chart-line"></i>
+                <div>Your current progress (${course.progress}%) will be lost</div>
+              </div>
+              <div class="warning-item">
+                <i class="fas fa-calendar-times"></i>
+                <div>You may need to wait until next semester to re-enroll</div>
+              </div>
+            </div>
+            
+            <div class="confirm-drop-box">
+              <label class="confirm-checkbox">
+                <input type="checkbox" id="confirm-drop-checkbox">
+                <span>I understand this action cannot be undone</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="modal-action-btn secondary-btn" id="cancel-drop">
               Cancel
+            </button>
+            <button class="modal-action-btn danger-btn" id="confirm-drop" disabled>
+              <i class="fas fa-times"></i> Drop Course
             </button>
           </div>
         </div>
@@ -891,10 +1024,17 @@
     const modal = document.getElementById('drop-modal');
     const confirmBtn = document.getElementById('confirm-drop');
     const cancelBtn = document.getElementById('cancel-drop');
+    const confirmCheckbox = document.getElementById('confirm-drop-checkbox');
+    const closeBtn = document.querySelector('#drop-modal .modal-close-btn');
+    
+    // Enable confirm button when checkbox is checked
+    confirmCheckbox.addEventListener('change', function() {
+      confirmBtn.disabled = !this.checked;
+    });
     
     confirmBtn.addEventListener('click', () => {
       // In a real app, this would make an API call to drop the course
-      showNotification(`Successfully dropped ${course.code}`, 'info');
+      showNotification(`Successfully dropped ${course.code}`, 'warning');
       modal.remove();
       
       // Simulate removing the course from the list
@@ -907,6 +1047,10 @@
     });
     
     cancelBtn.addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    closeBtn.addEventListener('click', () => {
       modal.remove();
     });
     
@@ -923,12 +1067,232 @@
     });
   }
 
+  // Show grade details modal
+  function showGradeDetails(course) {
+    const modalHTML = `
+      <div class="modal-overlay" id="grade-modal">
+        <div class="modal-content">
+          <div class="modal-header" style="border-bottom-color: ${course.color}">
+            <h3 class="modal-title">
+              <i class="fas fa-chart-line"></i> Grade Details: ${course.code}
+            </h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="grade-overview">
+              <div class="grade-letter" style="color: ${course.color}">
+                ${course.grade}
+              </div>
+              <div class="grade-info">
+                <h4>${course.title}</h4>
+                <p>Instructor: ${course.teacher}</p>
+                <p>Status: ${course.status}</p>
+              </div>
+            </div>
+            
+            <div class="grade-breakdown">
+              <h4><i class="fas fa-tasks"></i> Grade Breakdown</h4>
+              <div class="breakdown-items">
+                <div class="breakdown-item">
+                  <div class="breakdown-label">Assignments</div>
+                  <div class="breakdown-bar">
+                    <div class="breakdown-fill" style="width: 85%; background: #6a11cb;"></div>
+                  </div>
+                  <div class="breakdown-value">85% (A-)</div>
+                </div>
+                <div class="breakdown-item">
+                  <div class="breakdown-label">Midterm Exam</div>
+                  <div class="breakdown-bar">
+                    <div class="breakdown-fill" style="width: 78%; background: #2575fc;"></div>
+                  </div>
+                  <div class="breakdown-value">78% (B+)</div>
+                </div>
+                <div class="breakdown-item">
+                  <div class="breakdown-label">Final Project</div>
+                  <div class="breakdown-bar">
+                    <div class="breakdown-fill" style="width: 92%; background: #2ecc71;"></div>
+                  </div>
+                  <div class="breakdown-value">92% (A)</div>
+                </div>
+                <div class="breakdown-item">
+                  <div class="breakdown-label">Participation</div>
+                  <div class="breakdown-bar">
+                    <div class="breakdown-fill" style="width: 95%; background: #f39c12;"></div>
+                  </div>
+                  <div class="breakdown-value">95% (A)</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="grade-summary">
+              <div class="summary-item">
+                <div class="summary-label">Current Grade</div>
+                <div class="summary-value" style="color: ${course.color}">${course.grade}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Class Average</div>
+                <div class="summary-value">B+</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Position</div>
+                <div class="summary-value">Top 25%</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="modal-action-btn secondary-btn" id="close-modal-2">
+              Close
+            </button>
+            <button class="modal-action-btn primary-btn" onclick="showGradeHistory(${course.id})">
+              <i class="fas fa-history"></i> View Grade History
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    setupModalEvents();
+  }
+
+  // Show add course modal
+  function showAddCourseModal() {
+    const modalHTML = `
+      <div class="modal-overlay" id="add-course-modal">
+        <div class="modal-content">
+          <div class="modal-header" style="border-bottom-color: #6a11cb">
+            <h3 class="modal-title">
+              <i class="fas fa-plus-circle"></i> Add New Course
+            </h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="modal-body">
+            <form id="add-course-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="course-code"><i class="fas fa-hashtag"></i> Course Code</label>
+                  <input type="text" id="course-code" placeholder="e.g., CS301" required>
+                </div>
+                <div class="form-group">
+                  <label for="course-title"><i class="fas fa-book"></i> Course Title</label>
+                  <input type="text" id="course-title" placeholder="e.g., Advanced Algorithms" required>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="course-teacher"><i class="fas fa-chalkboard-teacher"></i> Instructor</label>
+                  <input type="text" id="course-teacher" placeholder="e.g., Dr. Smith" required>
+                </div>
+                <div class="form-group">
+                  <label for="course-credits"><i class="fas fa-clock"></i> Credits</label>
+                  <select id="course-credits" required>
+                    <option value="">Select credits</option>
+                    <option value="1">1 Credit</option>
+                    <option value="2">2 Credits</option>
+                    <option value="3" selected>3 Credits</option>
+                    <option value="4">4 Credits</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="course-schedule"><i class="fas fa-calendar-alt"></i> Schedule</label>
+                  <input type="text" id="course-schedule" placeholder="e.g., Mon/Wed 2:00-3:30" required>
+                </div>
+                <div class="form-group">
+                  <label for="course-department"><i class="fas fa-university"></i> Department</label>
+                  <select id="course-department" required>
+                    <option value="">Select department</option>
+                    <option value="cs" selected>Computer Science</option>
+                    <option value="eng">English</option>
+                    <option value="math">Mathematics</option>
+                    <option value="phy">Physics</option>
+                    <option value="bio">Biology</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="course-description"><i class="fas fa-align-left"></i> Course Description</label>
+                <textarea id="course-description" rows="3" placeholder="Enter course description..."></textarea>
+              </div>
+              
+              <div class="form-notice">
+                <i class="fas fa-info-circle"></i>
+                <p>You will be able to add course materials after the course is created.</p>
+              </div>
+            </form>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="modal-action-btn secondary-btn" id="close-modal-2">
+              Cancel
+            </button>
+            <button class="modal-action-btn primary-btn" id="submit-course">
+              <i class="fas fa-plus"></i> Add Course
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    setupModalEvents();
+    
+    // Handle form submission
+    const form = document.getElementById('add-course-form');
+    const submitBtn = document.getElementById('submit-course');
+    
+    submitBtn.addEventListener('click', function() {
+      if (form.checkValidity()) {
+        // In a real app, this would make an API call to add the course
+        showNotification('Course added successfully!', 'success');
+        document.querySelector('.modal-overlay').remove();
+        
+        // Simulate adding a new course
+        const newCourse = {
+          id: coursesData.length + 1,
+          code: document.getElementById('course-code').value,
+          title: document.getElementById('course-title').value,
+          teacher: document.getElementById('course-teacher').value,
+          schedule: document.getElementById('course-schedule').value,
+          credits: parseInt(document.getElementById('course-credits').value),
+          department: document.getElementById('course-department').value,
+          status: "active",
+          description: document.getElementById('course-description').value || "No description available.",
+          materials: ["Syllabus.pdf"],
+          grade: "Not graded yet",
+          progress: 0,
+          color: getRandomColor()
+        };
+        
+        coursesData.unshift(newCourse);
+        updateStatistics();
+        currentView === 'table' ? populateTableView() : populateCardView();
+      } else {
+        form.reportValidity();
+      }
+    });
+  }
+
   // Setup modal events
   function setupModalEvents() {
-    const modal = document.querySelector('.modal-overlay');
-    const closeBtn = document.querySelector('.modal-close-btn');
+    const modal = document.querySelector('.modal-overlay:last-of-type');
+    const closeBtns = modal.querySelectorAll('.modal-close-btn, .secondary-btn');
     
-    closeBtn.addEventListener('click', () => closeModal(modal));
+    closeBtns.forEach(btn => {
+      btn.addEventListener('click', () => closeModal(modal));
+    });
+    
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal(modal);
     });
@@ -952,100 +1316,1681 @@
 
   // Show notification
   function showNotification(message, type = 'success') {
+    const container = document.getElementById('notification-container');
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    notification.textContent = message;
+    notification.innerHTML = `
+      <div class="notification-icon">
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+      </div>
+      <div class="notification-message">${message}</div>
+      <button class="notification-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
     
-    document.body.appendChild(notification);
+    container.appendChild(notification);
     
+    // Auto remove after 4 seconds
     setTimeout(() => {
-      notification.style.animation = 'fadeOut 0.5s ease';
-      setTimeout(() => notification.remove(), 500);
-    }, 3000);
+      if (notification.parentElement) {
+        notification.style.animation = 'slideOutRight 0.5s ease';
+        setTimeout(() => notification.remove(), 500);
+      }
+    }, 4000);
   }
 
   // Download material (simulated)
   function downloadMaterial(filename) {
-    showNotification(`Downloading ${filename}...`, 'info');
+    showNotification(`Downloading "${filename}"...`, 'info');
     // In a real app, this would trigger a file download
   }
 
-  // Initialize the page
-  function init() {
-    // Update statistics
-    updateStatistics();
-    
-    // Populate initial table view
-    populateTableView();
-    
-    // Back button functionality
-    backBtn.addEventListener('click', function() {
-      const originalText = this.innerHTML;
-      this.innerHTML = 'Redirecting...';
-      this.disabled = true;
-      
-      showNotification('Returning to Dashboard...', 'info');
-      
-      setTimeout(() => {
-        this.innerHTML = originalText;
-        this.disabled = false;
-        // In real app: window.location.href = 'dashboard.html';
-        showNotification('Dashboard navigation simulated.', 'info');
-      }, 1500);
-    });
-    
-    // Toggle view button
-    toggleViewBtn.addEventListener('click', toggleView);
-    
-    // Search functionality
-    searchBox.addEventListener('input', function() {
-      currentSearch = this.value;
-      currentView === 'table' ? populateTableView() : populateCardView();
-    });
-    
-    // Filter buttons
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        // Update active state
-        filterBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        
-        // Update filter
-        currentFilter = this.getAttribute('data-filter');
-        currentView === 'table' ? populateTableView() : populateCardView();
-      });
-    });
-    
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      // Ctrl/Cmd + F to focus search
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault();
-        searchBox.focus();
-      }
-      
-      // Ctrl/Cmd + T to toggle view
-      if ((e.ctrlKey || e.metaKey) && e.key === 't') {
-        e.preventDefault();
-        toggleView();
-      }
-      
-      // Escape to close modals
-      if (e.key === 'Escape') {
-        const modal = document.querySelector('.modal-overlay');
-        if (modal) modal.remove();
-      }
-    });
-    
-    // Show welcome message
-    setTimeout(() => {
-      showNotification('Courses page loaded. Click on any course for details!', 'success');
-    }, 1000);
+  // Download all materials (simulated)
+  function downloadAllMaterials(courseId) {
+    const course = coursesData.find(c => c.id === courseId);
+    if (course) {
+      showNotification(`Preparing ${course.materials.length} files for download...`, 'info');
+    }
+  }
+
+  // Preview material (simulated)
+  function previewMaterial(filename) {
+    showNotification(`Previewing "${filename}"...`, 'info');
+  }
+
+  // Show grade history (simulated)
+  function showGradeHistory(courseId) {
+    showNotification('Loading grade history...', 'info');
+  }
+
+  // Get random color for new courses
+  function getRandomColor() {
+    const colors = ['#6a11cb', '#2575fc', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c'];
+    return colors[Math.floor(Math.random() * colors.length)];
   }
 
   // Initialize when page loads
   document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<style>
+  /* Reset and Base Styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 20px rgba(106, 17, 203, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-bar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .top-bar h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    flex-grow: 1;
+  }
+
+  .top-bar i {
+    font-size: 1.5rem;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .user-info img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Container */
+  .container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* Header Section */
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .header-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .header-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Buttons */
+  .toggle-view-btn, .add-course-btn, .back-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .toggle-view-btn {
+    background: #edf2f7;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+  }
+
+  .toggle-view-btn:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .add-course-btn {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+  }
+
+  .add-course-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  .back-btn {
+    background: #4a5568;
+    color: white;
+    margin: 2rem auto;
+    display: block;
+  }
+
+  .back-btn:hover {
+    background: #2d3748;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Statistics Cards */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid #6a11cb;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-card:nth-child(2) {
+    border-top-color: #2575fc;
+  }
+
+  .stat-card:nth-child(3) {
+    border-top-color: #2ecc71;
+  }
+
+  .stat-card:nth-child(4) {
+    border-top-color: #f39c12;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #6a11cb20, #2575fc20);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #6a11cb;
+    font-size: 1.5rem;
+  }
+
+  .stat-card:nth-child(2) .stat-icon {
+    background: linear-gradient(135deg, #2575fc20, #2ecc7120);
+    color: #2575fc;
+  }
+
+  .stat-card:nth-child(3) .stat-icon {
+    background: linear-gradient(135deg, #2ecc7120, #f39c1220);
+    color: #2ecc71;
+  }
+
+  .stat-card:nth-child(4) .stat-icon {
+    background: linear-gradient(135deg, #f39c1220, #e74c3c20);
+    color: #f39c12;
+  }
+
+  .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+
+  .label {
+    font-size: 1rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-change {
+    font-size: 0.85rem;
+    color: #38a169;
+    font-weight: 500;
+  }
+
+  /* Filter and Search */
+  .filter-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+  }
+
+  .search-box {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+  .search-box:focus {
+    outline: none;
+    border-color: #6a11cb;
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+
+  .search-clear:hover {
+    color: #718096;
+  }
+
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.6rem 1.2rem;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #4a5568;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-color: #6a11cb;
+    box-shadow: 0 2px 8px rgba(106, 17, 203, 0.2);
+  }
+
+  .sort-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sort-select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: #4a5568;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .sort-select:focus {
+    outline: none;
+    border-color: #6a11cb;
+  }
+
+  /* Table Container */
+  .table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .view-transition {
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* Table Styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+  }
+
+  th {
+    padding: 1.2rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  th i {
+    margin-left: 0.5rem;
+    color: #cbd5e0;
+    cursor: pointer;
+  }
+
+  th i:hover {
+    color: #6a11cb;
+  }
+
+  td {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+  }
+
+  tbody tr {
+    animation: slideIn 0.3s ease;
+    animation-fill-mode: both;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Course Code Cell */
+  .course-code-cell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .course-code {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .course-status {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Course Title Cell */
+  .course-title-cell {
+    max-width: 300px;
+  }
+
+  .course-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+
+  .course-description {
+    font-size: 0.9rem;
+    color: #718096;
+    line-height: 1.4;
+  }
+
+  /* Teacher Cell */
+  .teacher-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .teacher-avatar img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .teacher-name {
+    font-weight: 500;
+  }
+
+  /* Schedule Cell */
+  .schedule-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .schedule-cell i {
+    color: #6a11cb;
+    margin-right: 0.5rem;
+  }
+
+  .credits-badge {
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+    width: fit-content;
+  }
+
+  /* Credits Cell */
+  .credits-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .credits-value {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #6a11cb;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-text {
+    font-size: 0.8rem;
+    color: #718096;
+  }
+
+  /* Course Actions */
+  .course-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: #f7fafc;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .view-btn:hover {
+    background: #6a11cb;
+    color: white;
+  }
+
+  .materials-btn:hover {
+    background: #2575fc;
+    color: white;
+  }
+
+  .grade-btn:hover {
+    background: #2ecc71;
+    color: white;
+  }
+
+  .drop-btn:hover {
+    background: #e74c3c;
+    color: white;
+  }
+
+  /* No Results */
+  .no-results, .no-results-card {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .no-results-content i {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1.5rem;
+  }
+
+  .no-results-content h3 {
+    font-size: 1.5rem;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+  }
+
+  .no-results-content p {
+    color: #a0aec0;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Table Footer */
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .showing-text {
+    color: #718096;
+    font-size: 0.9rem;
+  }
+
+  .pagination {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pagination-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .pagination-btn:hover:not(.disabled) {
+    border-color: #6a11cb;
+    color: #6a11cb;
+  }
+
+  .pagination-btn.active {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-color: #6a11cb;
+  }
+
+  .pagination-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Cards View */
+  .cards-container {
+    display: none;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .course-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: slideIn 0.3s ease;
+    animation-fill-mode: both;
+  }
+
+  .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+  }
+
+  .course-card-header {
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .course-card-code {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .course-card-status {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .course-card-body {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .course-card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  .course-card-teacher {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .course-card-description {
+    color: #718096;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .course-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4a5568;
+    font-size: 0.9rem;
+  }
+
+  .meta-item i {
+    color: #6a11cb;
+  }
+
+  .course-progress {
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #4a5568;
+  }
+
+  .course-card-footer {
+    padding: 1.2rem 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .card-action-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .card-action-btn.view-btn {
+    background: #edf2f7;
+    color: #4a5568;
+  }
+
+  .card-action-btn.view-btn:hover {
+    background: #6a11cb;
+    color: white;
+  }
+
+  .card-action-btn.materials-btn {
+    background: #edf2f7;
+    color: #4a5568;
+  }
+
+  .card-action-btn.materials-btn:hover {
+    background: #2575fc;
+    color: white;
+  }
+
+  .card-action-btn.drop-btn {
+    background: #fed7d7;
+    color: #c53030;
+  }
+
+  .card-action-btn.drop-btn:hover {
+    background: #e74c3c;
+    color: white;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .course-code-badge {
+    background: #6a11cb;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .modal-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f7fafc;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .modal-close-btn:hover {
+    background: #e74c3c;
+    color: white;
+  }
+
+  .modal-body {
+    padding: 2rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .modal-action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  .secondary-btn {
+    background: #edf2f7;
+    color: #4a5568;
+  }
+
+  .secondary-btn:hover {
+    background: #e2e8f0;
+  }
+
+  .danger-btn {
+    background: #e74c3c;
+    color: white;
+  }
+
+  .danger-btn:hover:not(:disabled) {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  }
+
+  .danger-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Course Info Grid */
+  .course-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .info-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #718096;
+    font-size: 0.9rem;
+  }
+
+  .info-label i {
+    color: #6a11cb;
+  }
+
+  .info-value {
+    font-weight: 500;
+    color: #2d3748;
+    font-size: 1.1rem;
+  }
+
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .grade-value {
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  /* Course Description Section */
+  .course-description-section, .course-progress-section, .course-materials-section {
+    margin-bottom: 2rem;
+  }
+
+  .course-description-section h4, 
+  .course-progress-section h4,
+  .course-materials-section h4 {
+    font-size: 1.2rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .course-description-section p {
+    line-height: 1.7;
+    color: #4a5568;
+  }
+
+  /* Progress Container */
+  .progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Materials List */
+  .materials-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .material-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+  }
+
+  .material-item:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+
+  .material-icon {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: #6a11cb;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  .material-info {
+    flex-grow: 1;
+  }
+
+  .material-name {
+    font-weight: 500;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+
+  .material-meta {
+    font-size: 0.8rem;
+    color: #a0aec0;
+  }
+
+  .material-download-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: none;
+    background: white;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  .material-download-btn:hover {
+    background: #6a11cb;
+    color: white;
+  }
+
+  /* Warning Modal */
+  .warning-modal .modal-header {
+    border-bottom-color: #e74c3c;
+  }
+
+  .warning-icon {
+    font-size: 4rem;
+    color: #e74c3c;
+    margin-bottom: 1.5rem;
+  }
+
+  .warning-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .warning-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff5f5;
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+  }
+
+  .warning-item i {
+    color: #e74c3c;
+    font-size: 1.2rem;
+  }
+
+  .confirm-drop-box {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .confirm-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .confirm-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #e74c3c;
+  }
+
+  /* Course Info Banner */
+  .course-info-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+
+  .banner-content h4 {
+    font-size: 1.3rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .banner-content p {
+    color: #718096;
+  }
+
+  .banner-icon {
+    font-size: 3rem;
+    color: rgba(106, 17, 203, 0.2);
+  }
+
+  /* Materials Header */
+  .materials-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .download-all-btn {
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .download-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  /* Materials Table */
+  .materials-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .material-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .material-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .material-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .preview-btn, .download-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: white;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .preview-btn:hover {
+    background: #6a11cb;
+    color: white;
+  }
+
+  .download-btn:hover {
+    background: #2575fc;
+    color: white;
+  }
+
+  /* Note Box */
+  .note-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: #ebf8ff;
+    border-radius: 8px;
+    border-left: 4px solid #4299e1;
+  }
+
+  .note-box i {
+    color: #4299e1;
+    font-size: 1.2rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Grade Overview */
+  .grade-overview {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .grade-letter {
+    font-size: 3.5rem;
+    font-weight: 700;
+  }
+
+  /* Grade Breakdown */
+  .grade-breakdown {
+    margin-bottom: 2rem;
+  }
+
+  .breakdown-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .breakdown-label {
+    width: 120px;
+    font-weight: 500;
+    color: #4a5568;
+  }
+
+  .breakdown-bar {
+    flex-grow: 1;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .breakdown-fill {
+    height: 100%;
+    border-radius: 5px;
+  }
+
+  .breakdown-value {
+    width: 80px;
+    text-align: right;
+    font-weight: 600;
+    color: #2d3748;
+  }
+
+  /* Grade Summary */
+  .grade-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .summary-label {
+    font-size: 0.9rem;
+    color: #718096;
+  }
+
+  .summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  /* Form Styles */
+  #add-course-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-weight: 500;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #6a11cb;
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+  }
+
+  .form-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .form-notice i {
+    color: #0ea5e9;
+    font-size: 1.2rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Notification Container */
+  #notification-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 350px;
+  }
+
+  .notification {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
+  }
+
+  .notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+  }
+
+  .notification.success {
+    background: white;
+    border-left: 5px solid #2ecc71;
+  }
+
+  .notification.success::before {
+    background: #2ecc71;
+  }
+
+  .notification.warning {
+    background: white;
+    border-left: 5px solid #f39c12;
+  }
+
+  .notification.warning::before {
+    background: #f39c12;
+  }
+
+  .notification.info {
+    background: white;
+    border-left: 5px solid #3498db;
+  }
+
+  .notification.info::before {
+    background: #3498db;
+  }
+
+  .notification-icon {
+    font-size: 1.5rem;
+  }
+
+  .notification.success .notification-icon {
+    color: #2ecc71;
+  }
+
+  .notification.warning .notification-icon {
+    color: #f39c12;
+  }
+
+  .notification.info .notification-icon {
+    color: #3498db;
+  }
+
+  .notification-message {
+    flex-grow: 1;
+    font-weight: 500;
+  }
+
+  .notification-close {
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification-close:hover {
+    color: #718096;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 1024px) {
+    .cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    
+    .course-info-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .header-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .filter-buttons {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .course-info-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .material-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .material-actions {
+      align-self: flex-end;
+    }
+    
+    .grade-overview {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .breakdown-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .breakdown-label, .breakdown-value {
+      width: 100%;
+      text-align: left;
+    }
+    
+    .breakdown-bar {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .top-bar-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .user-info {
+      align-self: flex-start;
+    }
+    
+    .header-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .toggle-view-btn, .add-course-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .stats-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .table-footer {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .modal-content {
+      max-height: 95vh;
+    }
+  }
+</style>
 
 </body>
 </html>
