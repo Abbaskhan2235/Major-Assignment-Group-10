@@ -4,52 +4,986 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Internal Marks - Mini LMS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Reset and Base Styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 1.2rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .top-bar h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .top-bar h1 i {
+    color: #6a11cb;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .user-info img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(106, 17, 203, 0.3);
+  }
+
+  /* Container */
+  .container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .page-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .page-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .stats-summary {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .stat-badge {
+    background: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-left: 4px solid;
+  }
+
+  .stat-badge.gpa {
+    border-left-color: #6a11cb;
+  }
+
+  .stat-badge.avg {
+    border-left-color: #2ecc71;
+  }
+
+  .stat-badge.rank {
+    border-left-color: #f39c12;
+  }
+
+  .stat-badge i {
+    font-size: 1.5rem;
+  }
+
+  .stat-badge.gpa i {
+    color: #6a11cb;
+  }
+
+  .stat-badge.avg i {
+    color: #2ecc71;
+  }
+
+  .stat-badge.rank i {
+    color: #f39c12;
+  }
+
+  .stat-badge .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+  }
+
+  .stat-badge .label {
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  /* Download Button */
+  .download-btn {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  /* Marks Table Container */
+  .table-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+  }
+
+  th {
+    padding: 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  th:first-child {
+    padding-left: 2.5rem;
+  }
+
+  th:last-child {
+    padding-right: 2.5rem;
+  }
+
+  th i {
+    margin-left: 0.5rem;
+    color: #cbd5e0;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  th i:hover {
+    color: #6a11cb;
+  }
+
+  tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 1.5rem;
+    color: #475569;
+  }
+
+  td:first-child {
+    padding-left: 2.5rem;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  td:last-child {
+    padding-right: 2.5rem;
+  }
+
+  /* Course Cell */
+  .course-cell {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .course-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+  }
+
+  .programming .course-icon {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .data-structures .course-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .communication .course-icon {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  .course-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .course-name {
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+  }
+
+  .course-code {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  /* Marks Cell */
+  .marks-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .marks-value {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #1a1a2e;
+  }
+
+  .marks-percentage {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  /* Progress Bar Container */
+  .progress-container {
+    width: 100px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .programming .progress-bar {
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    width: 85%;
+  }
+
+  .data-structures .progress-bar {
+    background: linear-gradient(90deg, #2ecc71 0%, #1abc9c 100%);
+    width: 75%;
+  }
+
+  .communication .progress-bar {
+    background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+    width: 93%;
+  }
+
+  /* Grade Badge */
+  .grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  .programming .grade-badge {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .data-structures .grade-badge {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .communication .grade-badge {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  /* Actions Cell */
+  .actions-cell {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    background: #6a11cb;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Back Button */
+  .back-btn {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Performance Chart */
+  .performance-chart {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .chart-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .legend-color.assignment {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .legend-color.quiz {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .legend-color.midterm {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  /* Chart Bars */
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+    height: 200px;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .chart-bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .chart-bar-container {
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .chart-bar {
+    flex: 1;
+    border-radius: 4px 4px 0 0;
+    transition: height 1s ease;
+  }
+
+  .chart-bar.assignment {
+    background: linear-gradient(to top, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .chart-bar.quiz {
+    background: linear-gradient(to top, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .chart-bar.midterm {
+    background: linear-gradient(to top, #f39c12 0%, #e67e22 100%);
+  }
+
+  .chart-label {
+    font-weight: 600;
+    color: #475569;
+    margin-top: 0.5rem;
+  }
+
+  /* Semester Filter */
+  .semester-filter {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: white;
+    border: 2px solid #e2e8f0;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    border-color: #6a11cb;
+    color: #6a11cb;
+  }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-color: transparent;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .stats-summary {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .chart-bars {
+      gap: 1rem;
+    }
+    
+    .chart-legend {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      min-width: 800px;
+    }
+    
+    .chart-bars {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .chart-bar-group {
+      flex-direction: row;
+      width: 100%;
+      gap: 1rem;
+    }
+    
+    .chart-bar-container {
+      height: 30px;
+      width: 70%;
+    }
+    
+    .chart-label {
+      width: 30%;
+      text-align: right;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .top-bar {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    
+    .user-info {
+      align-self: stretch;
+      justify-content: center;
+    }
+    
+    .page-header h2 {
+      font-size: 1.8rem;
+    }
+    
+    .stat-badge {
+      flex-direction: column;
+      text-align: center;
+      padding: 1rem;
+    }
+  }
+</style>
 </head>
 
 <body>
 
-<div class="top-bar">Internal Marks</div>
+<div class="top-bar">
+  <h1><i class="fas fa-chart-line"></i> Internal Marks</h1>
+  <div class="user-info">
+    <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff" alt="Student">
+    <span>John Doe | ID: 14656</span>
+  </div>
+</div>
 
 <div class="container">
-  <h2>Marks Summary</h2>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Academic Performance</h2>
+    <div class="header-actions">
+      <div class="stats-summary">
+        <div class="stat-badge gpa">
+          <i class="fas fa-star"></i>
+          <div>
+            <div class="value">3.75</div>
+            <div class="label">Current GPA</div>
+          </div>
+        </div>
+        <div class="stat-badge avg">
+          <i class="fas fa-chart-bar"></i>
+          <div>
+            <div class="value">84.5%</div>
+            <div class="label">Average Score</div>
+          </div>
+        </div>
+        <div class="stat-badge rank">
+          <i class="fas fa-trophy"></i>
+          <div>
+            <div class="value">#12</div>
+            <div class="label">Class Rank</div>
+          </div>
+        </div>
+      </div>
+      <button class="download-btn">
+        <i class="fas fa-download"></i> Download Report
+      </button>
+    </div>
+  </div>
 
-  <table>
-    <tr>
-      <th>Course</th>
-      <th>Assignment</th>
-      <th>Quiz</th>
-      <th>Midterm</th>
-      <th>Total</th>
-    </tr>
+  <!-- Semester Filter -->
+  <div class="semester-filter">
+    <button class="filter-btn active">Current Semester</button>
+    <button class="filter-btn">Fall 2023</button>
+    <button class="filter-btn">Spring 2023</button>
+    <button class="filter-btn">All Semesters</button>
+  </div>
 
-    <tr>
-      <td>Programming</td>
-      <td>18 / 20</td>
-      <td>9 / 10</td>
-      <td>24 / 30</td>
-      <td>51 / 60</td>
-    </tr>
+  <!-- Performance Chart -->
+  <div class="performance-chart">
+    <div class="chart-header">
+      <h3>Performance Overview</h3>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-color assignment"></div>
+          <span>Assignments</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color quiz"></div>
+          <span>Quizzes</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color midterm"></div>
+          <span>Midterms</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="chart-bars">
+      <div class="chart-bar-group">
+        <div class="chart-bar-container">
+          <div class="chart-bar assignment" style="height: 90%"></div>
+          <div class="chart-bar quiz" style="height: 85%"></div>
+          <div class="chart-bar midterm" style="height: 80%"></div>
+        </div>
+        <div class="chart-label">Programming</div>
+      </div>
+      
+      <div class="chart-bar-group">
+        <div class="chart-bar-container">
+          <div class="chart-bar assignment" style="height: 75%"></div>
+          <div class="chart-bar quiz" style="height: 80%"></div>
+          <div class="chart-bar midterm" style="height: 73%"></div>
+        </div>
+        <div class="chart-label">Data Structures</div>
+      </div>
+      
+      <div class="chart-bar-group">
+        <div class="chart-bar-container">
+          <div class="chart-bar assignment" style="height: 95%"></div>
+          <div class="chart-bar quiz" style="height: 100%"></div>
+          <div class="chart-bar midterm" style="height: 90%"></div>
+        </div>
+        <div class="chart-label">Communication</div>
+      </div>
+    </div>
+  </div>
 
-    <tr>
-      <td>Data Structures</td>
-      <td>15 / 20</td>
-      <td>8 / 10</td>
-      <td>22 / 30</td>
-      <td>45 / 60</td>
-    </tr>
+  <!-- Marks Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Course <i class="fas fa-sort"></i></th>
+          <th>Assignment <i class="fas fa-sort"></i></th>
+          <th>Quiz <i class="fas fa-sort"></i></th>
+          <th>Midterm <i class="fas fa-sort"></i></th>
+          <th>Total <i class="fas fa-sort"></i></th>
+          <th>Grade</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Programming Row -->
+        <tr class="programming">
+          <td>
+            <div class="course-cell">
+              <div class="course-icon">
+                <i class="fas fa-code"></i>
+              </div>
+              <div class="course-info">
+                <div class="course-name">Introduction to Programming</div>
+                <div class="course-code">CS101 | Dr. Ahmed</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">18 / 20</div>
+              <div class="marks-percentage">90%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">9 / 10</div>
+              <div class="marks-percentage">90%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">24 / 30</div>
+              <div class="marks-percentage">80%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">51 / 60</div>
+              <div class="marks-percentage">85%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="marks-value">A-</span>
+            <span class="grade-badge">A-</span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn" title="View Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="action-btn" title="Compare">
+                <i class="fas fa-chart-bar"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
 
-    <tr>
-      <td>Communication Skills</td>
-      <td>19 / 20</td>
-      <td>10 / 10</td>
-      <td>27 / 30</td>
-      <td>56 / 60</td>
-    </tr>
+        <!-- Data Structures Row -->
+        <tr class="data-structures">
+          <td>
+            <div class="course-cell">
+              <div class="course-icon">
+                <i class="fas fa-sitemap"></i>
+              </div>
+              <div class="course-info">
+                <div class="course-name">Data Structures</div>
+                <div class="course-code">CS102 | Dr. Bilal</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">15 / 20</div>
+              <div class="marks-percentage">75%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">8 / 10</div>
+              <div class="marks-percentage">80%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">22 / 30</div>
+              <div class="marks-percentage">73%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">45 / 60</div>
+              <div class="marks-percentage">75%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="marks-value">B</span>
+            <span class="grade-badge">B</span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn" title="View Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="action-btn" title="Compare">
+                <i class="fas fa-chart-bar"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
 
-  </table>
+        <!-- Communication Skills Row -->
+        <tr class="communication">
+          <td>
+            <div class="course-cell">
+              <div class="course-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="course-info">
+                <div class="course-name">Communication Skills</div>
+                <div class="course-code">ENG101 | Dr. Sana</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">19 / 20</div>
+              <div class="marks-percentage">95%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">10 / 10</div>
+              <div class="marks-percentage">100%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">27 / 30</div>
+              <div class="marks-percentage">90%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="marks-cell">
+              <div class="marks-value">56 / 60</div>
+              <div class="marks-percentage">93%</div>
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="marks-value">A</span>
+            <span class="grade-badge">A</span>
+          </td>
+          <td>
+            <div class="actions-cell">
+              <button class="action-btn" title="View Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn" title="Download Report">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="action-btn" title="Compare">
+                <i class="fas fa-chart-bar"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  <button class="back-btn">Back to Dashboard</button>
-
+  <button class="back-btn">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </button>
 </div>
 
 </body>
