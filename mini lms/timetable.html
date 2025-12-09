@@ -4,51 +4,1059 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Timetable - Mini LMS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Reset and Base Styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 1.2rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .top-bar h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .top-bar h1 i {
+    color: #6a11cb;
+  }
+
+  .current-week {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .current-week i {
+    color: #6a11cb;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .page-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .page-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  /* Week Navigation */
+  .week-navigation {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover {
+    background: #6a11cb;
+    color: white;
+    border-color: #6a11cb;
+  }
+
+  .current-week-display {
+    font-weight: 600;
+    color: #1a1a2e;
+    min-width: 150px;
+    text-align: center;
+  }
+
+  /* View Toggle */
+  .view-toggle {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .view-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    background: white;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-btn.active {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+  }
+
+  .view-btn:not(.active):hover {
+    background: #f8fafc;
+    color: #6a11cb;
+  }
+
+  /* Timetable Container */
+  .timetable-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  /* Timetable Grid */
+  .timetable-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(4, 1fr);
+    grid-template-rows: 80px repeat(3, 150px);
+    gap: 1px;
+    background: #e2e8f0;
+  }
+
+  /* Time Header */
+  .time-header {
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #475569;
+    padding: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .time-slot {
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #1a1a2e;
+    padding: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  /* Day Header */
+  .day-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* Class Cell */
+  .class-cell {
+    background: white;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .class-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+  }
+
+  .class-cell.free {
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .class-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .subject-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-code {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+  }
+
+  .class-details {
+    margin-top: auto;
+  }
+
+  .class-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .class-time i {
+    color: #6a11cb;
+  }
+
+  .class-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .class-location i {
+    color: #f39c12;
+  }
+
+  /* Subject Colors */
+  .programming {
+    border-left: 4px solid #6a11cb;
+  }
+
+  .programming .subject-name {
+    color: #6a11cb;
+  }
+
+  .dsa {
+    border-left: 4px solid #2ecc71;
+  }
+
+  .dsa .subject-name {
+    color: #2ecc71;
+  }
+
+  .english {
+    border-left: 4px solid #f39c12;
+  }
+
+  .english .subject-name {
+    color: #f39c12;
+  }
+
+  /* Free Time */
+  .free .free-content {
+    text-align: center;
+    color: #94a3b8;
+  }
+
+  .free .free-content i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+  }
+
+  .free .free-content p {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* Current Class Indicator */
+  .current-class {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .current-class::before {
+    content: 'NOW';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    z-index: 3;
+  }
+
+  /* Timetable Legend */
+  .timetable-legend {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .legend-items {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+  }
+
+  .legend-color.programming {
+    background: #6a11cb;
+  }
+
+  .legend-color.dsa {
+    background: #2ecc71;
+  }
+
+  .legend-color.english {
+    background: #f39c12;
+  }
+
+  .legend-label {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  /* Upcoming Classes */
+  .upcoming-classes {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+  }
+
+  .upcoming-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .upcoming-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+  }
+
+  .upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .upcoming-item {
+    display: flex;
+    align-items: center;
+    padding: 1.2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid;
+    transition: all 0.2s;
+  }
+
+  .upcoming-item:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateX(5px);
+  }
+
+  .upcoming-item.programming {
+    border-left-color: #6a11cb;
+  }
+
+  .upcoming-item.dsa {
+    border-left-color: #2ecc71;
+  }
+
+  .upcoming-item.english {
+    border-left-color: #f39c12;
+  }
+
+  .upcoming-time {
+    min-width: 100px;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    background: white;
+    border-radius: 8px;
+    margin-right: 1.5rem;
+  }
+
+  .upcoming-time .time {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+  }
+
+  .upcoming-time .duration {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .upcoming-details {
+    flex: 1;
+  }
+
+  .upcoming-details h4 {
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+  }
+
+  .upcoming-details p {
+    font-size: 0.9rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .upcoming-details i {
+    color: #6a11cb;
+  }
+
+  /* Download Button */
+  .download-btn {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  /* Back Button */
+  .back-btn {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .timetable-grid {
+      grid-template-columns: 100px repeat(4, 1fr);
+      grid-template-rows: 70px repeat(3, 130px);
+    }
+    
+    .class-cell {
+      padding: 1rem;
+    }
+    
+    .subject-name {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+    }
+    
+    .week-navigation {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .view-toggle {
+      width: 100%;
+    }
+    
+    .timetable-container {
+      overflow-x: auto;
+    }
+    
+    .timetable-grid {
+      min-width: 800px;
+    }
+    
+    .timetable-legend {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    
+    .legend-items {
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .top-bar {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    
+    .current-week {
+      align-self: stretch;
+      justify-content: center;
+    }
+    
+    .page-header h2 {
+      font-size: 1.8rem;
+    }
+    
+    .upcoming-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .upcoming-time {
+      align-self: stretch;
+      text-align: left;
+    }
+  }
+</style>
 </head>
 
 <body>
 
-<div class="top-bar">My Timetable</div>
+<div class="top-bar">
+  <h1><i class="fas fa-calendar-alt"></i> My Timetable</h1>
+  <div class="current-week">
+    <i class="fas fa-calendar-week"></i>
+    <span>Week 12 • March 18-24, 2024</span>
+  </div>
+</div>
 
 <div class="container">
-  <h2>Weekly Timetable</h2>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Weekly Schedule</h2>
+    <div class="header-actions">
+      <div class="week-navigation">
+        <button class="nav-btn">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="current-week-display">Current Week</div>
+        <button class="nav-btn">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active">Weekly</button>
+        <button class="view-btn">Daily</button>
+        <button class="view-btn">Monthly</button>
+      </div>
+      <button class="download-btn">
+        <i class="fas fa-download"></i> Export Timetable
+      </button>
+    </div>
+  </div>
 
-  <table>
-    <tr>
-      <th>Day</th>
-      <th>9:00–10:00</th>
-      <th>10:00–11:00</th>
-      <th>11:00–12:00</th>
-      <th>12:00–1:00</th>
-    </tr>
+  <!-- Timetable Grid -->
+  <div class="timetable-container">
+    <div class="timetable-grid">
+      <!-- Time Headers -->
+      <div class="time-header">TIME</div>
+      <div class="day-header">Monday</div>
+      <div class="day-header">Tuesday</div>
+      <div class="day-header">Wednesday</div>
+      <div class="day-header">Thursday</div>
+      <div class="day-header">Friday</div>
 
-    <tr>
-      <td>Monday</td>
-      <td>Programming</td>
-      <td>DSA</td>
-      <td>Free</td>
-      <td>English</td>
-    </tr>
+      <!-- Time Slots -->
+      <div class="time-slot">9:00 - 10:00</div>
+      <div class="class-cell programming current-class">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Programming</div>
+            <div class="course-code">CS101 • Room 302</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>9:00 AM - 10:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Computer Lab 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell dsa">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Data Structures</div>
+            <div class="course-code">CS102 • Room 304</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>9:00 AM - 10:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell programming">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Programming</div>
+            <div class="course-code">CS101 • Room 302</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>9:00 AM - 10:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Computer Lab 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-coffee"></i>
+          <p>No Class</p>
+        </div>
+      </div>
+      <div class="class-cell dsa">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Data Structures</div>
+            <div class="course-code">CS102 • Room 304</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>9:00 AM - 10:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <tr>
-      <td>Tuesday</td>
-      <td>DSA</td>
-      <td>English</td>
-      <td>Free</td>
-      <td>Programming</td>
-    </tr>
+      <!-- 10:00 - 11:00 -->
+      <div class="time-slot">10:00 - 11:00</div>
+      <div class="class-cell dsa">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Data Structures</div>
+            <div class="course-code">CS102 • Room 304</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>10:00 AM - 11:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell english">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Communication</div>
+            <div class="course-code">ENG101 • Room 205</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>10:00 AM - 11:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lecture Hall B</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-book"></i>
+          <p>Self Study</p>
+        </div>
+      </div>
+      <div class="class-cell dsa">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Data Structures</div>
+            <div class="course-code">CS102 • Room 304</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>10:00 AM - 11:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell programming">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Programming</div>
+            <div class="course-code">CS101 • Room 302</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>10:00 AM - 11:00 AM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Computer Lab 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <tr>
-      <td>Wednesday</td>
-      <td>Programming</td>
-      <td>Free</td>
-      <td>DSA</td>
-      <td>English</td>
-    </tr>
+      <!-- 11:00 - 12:00 -->
+      <div class="time-slot">11:00 - 12:00</div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-utensils"></i>
+          <p>Break Time</p>
+        </div>
+      </div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-utensils"></i>
+          <p>Break Time</p>
+        </div>
+      </div>
+      <div class="class-cell dsa">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Data Structures</div>
+            <div class="course-code">CS102 • Room 304</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>11:00 AM - 12:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lab 4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell english">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Communication</div>
+            <div class="course-code">ENG101 • Room 205</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>11:00 AM - 12:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lecture Hall B</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell english">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Communication</div>
+            <div class="course-code">ENG101 • Room 205</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>11:00 AM - 12:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lecture Hall B</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  </table>
+      <!-- 12:00 - 1:00 -->
+      <div class="time-slot">12:00 - 1:00</div>
+      <div class="class-cell english">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Communication</div>
+            <div class="course-code">ENG101 • Room 205</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>12:00 PM - 1:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lecture Hall B</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell programming">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Programming</div>
+            <div class="course-code">CS101 • Room 302</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>12:00 PM - 1:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Computer Lab 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell english">
+        <div class="class-content">
+          <div>
+            <div class="subject-name">Communication</div>
+            <div class="course-code">ENG101 • Room 205</div>
+          </div>
+          <div class="class-details">
+            <div class="class-time">
+              <i class="fas fa-clock"></i>
+              <span>12:00 PM - 1:00 PM</span>
+            </div>
+            <div class="class-location">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Lecture Hall B</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-running"></i>
+          <p>Free Period</p>
+        </div>
+      </div>
+      <div class="class-cell free">
+        <div class="free-content">
+          <i class="fas fa-running"></i>
+          <p>Weekend</p>
+        </div>
+      </div>
+    </div>
 
-  <button class="back-btn">Back to Dashboard</button>
+    <!-- Timetable Legend -->
+    <div class="timetable-legend">
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-color programming"></div>
+          <span class="legend-label">Programming (CS101)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color dsa"></div>
+          <span class="legend-label">Data Structures (CS102)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color english"></div>
+          <span class="legend-label">Communication Skills (ENG101)</span>
+        </div>
+      </div>
+      <div class="current-indicator">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #6a11cb; border-radius: 12px;"></div>
+          <span class="legend-label">Current Class</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Classes -->
+  <div class="upcoming-classes">
+    <div class="upcoming-header">
+      <h3>Today's Schedule</h3>
+      <div class="current-time">
+        <i class="fas fa-clock"></i>
+        <span>Current Time: 9:15 AM</span>
+      </div>
+    </div>
+    <div class="upcoming-list">
+      <div class="upcoming-item programming current-class">
+        <div class="upcoming-time">
+          <div class="time">9:00 AM</div>
+          <div class="duration">60 mins</div>
+        </div>
+        <div class="upcoming-details">
+          <h4>Introduction to Programming</h4>
+          <p><i class="fas fa-map-marker-alt"></i> Computer Lab 3 • Dr. Ahmed</p>
+        </div>
+        <div class="status-badge">
+          <span class="badge current">NOW</span>
+        </div>
+      </div>
+      <div class="upcoming-item dsa">
+        <div class="upcoming-time">
+          <div class="time">10:00 AM</div>
+          <div class="duration">60 mins</div>
+        </div>
+        <div class="upcoming-details">
+          <h4>Data Structures & Algorithms</h4>
+          <p><i class="fas fa-map-marker-alt"></i> Lab 4 • Dr. Bilal</p>
+        </div>
+      </div>
+      <div class="upcoming-item english">
+        <div class="upcoming-time">
+          <div class="time">12:00 PM</div>
+          <div class="duration">60 mins</div>
+        </div>
+        <div class="upcoming-details">
+          <h4>Communication Skills</h4>
+          <p><i class="fas fa-map-marker-alt"></i> Lecture Hall B • Dr. Sana</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="back-btn">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </button>
 </div>
 
 </body>
