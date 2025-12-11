@@ -1,3 +1,271 @@
+<?php
+// courses.php
+
+session_start();
+require_once 'config/database.php';
+require_once 'includes/session.php';
+
+// Check if user is logged in
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get user data from session
+$user_id = $_SESSION['user_id'];
+$username = $_SESSION['username'];
+$full_name = $_SESSION['full_name'];
+$role = $_SESSION['role'];
+$email = $_SESSION['email'];
+
+// Database connection
+$database = new Database();
+$db = $database->getConnection();
+
+// Initialize variables
+$courses = [];
+$enrolled_courses = [];
+$available_courses = [];
+$total_courses = 0;
+$cs_courses = 0;
+$other_courses = 0;
+$credits_hours = 0;
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$courses_per_page = 4;
+$search_term = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+$sort_by = isset($_GET['sort']) ? $_GET['sort'] : 'code';
+
+// Get courses based on user role
+if ($role == 'student') {
+    // Get enrolled courses for student
+    $query = "SELECT 
+                c.id, 
+                c.course_code as code, 
+                c.course_name as title, 
+                u.full_name as teacher,
+                CONCAT('Mon/Wed ', TIME_FORMAT(t.start_time, '%h:%i %p')) as schedule,
+                c.credits,
+                'active' as status,
+                'cs' as department,
+                c.description,
+                'A-' as grade,
+                FLOOR(RAND() * 40) + 60 as progress
+              FROM courses c
+              LEFT JOIN users u ON c.teacher_id = u.id
+              LEFT JOIN timetable t ON c.id = t.course_id
+              WHERE c.id IN (
+                SELECT course_id FROM enrollments 
+                WHERE student_id = :user_id
+              )
+              GROUP BY c.id";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $enrolled_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get available courses for enrollment
+    $query = "SELECT 
+                c.id, 
+                c.course_code as code, 
+                c.course_name as title, 
+                u.full_name as teacher,
+                c.credits,
+                c.description
+              FROM courses c
+              LEFT JOIN users u ON c.teacher_id = u.id
+              WHERE c.id NOT IN (
+                SELECT course_id FROM enrollments 
+                WHERE student_id = :user_id
+              )";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $available_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $courses = $enrolled_courses;
+    
+} elseif ($role == 'teacher') {
+    // Get courses taught by teacher
+    $query = "SELECT 
+                c.id, 
+                c.course_code as code, 
+                c.course_name as title, 
+                'You' as teacher,
+                CONCAT('Mon/Wed ', TIME_FORMAT(t.start_time, '%h:%i %p')) as schedule,
+                c.credits,
+                'active' as status,
+                'cs' as department,
+                c.description,
+                (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as enrolled_students,
+                FLOOR(RAND() * 40) + 60 as progress
+              FROM courses c
+              LEFT JOIN timetable t ON c.id = t.course_id
+              WHERE c.teacher_id = :user_id
+              GROUP BY c.id";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+} else {
+    // Admin - get all courses
+    $query = "SELECT 
+                c.id, 
+                c.course_code as code, 
+                c.course_name as title, 
+                u.full_name as teacher,
+                CONCAT('Mon/Wed ', TIME_FORMAT(t.start_time, '%h:%i %p')) as schedule,
+                c.credits,
+                CASE 
+                  WHEN c.id IN (SELECT course_id FROM enrollments) THEN 'active'
+                  ELSE 'inactive'
+                END as status,
+                'cs' as department,
+                c.description,
+                (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as enrolled_students,
+                FLOOR(RAND() * 40) + 60 as progress
+              FROM courses c
+              LEFT JOIN users u ON c.teacher_id = u.id
+              LEFT JOIN timetable t ON c.id = t.course_id
+              GROUP BY c.id";
+    
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Add colors and other properties to courses
+$colors = ['#6a11cb', '#2575fc', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c'];
+foreach ($courses as &$course) {
+    $course['id'] = $course['id'] ?? rand(100, 999);
+    $course['color'] = $colors[array_rand($colors)];
+    $course['materials'] = ['Syllabus.pdf', 'Lecture1.pptx', 'Assignment1.pdf'];
+    $course['grade'] = $course['grade'] ?? ($role == 'student' ? ['A-', 'B+', 'A', 'B', 'In Progress'][array_rand(['A-', 'B+', 'A', 'B', 'In Progress'])] : 'N/A');
+    $course['progress'] = $course['progress'] ?? rand(60, 95);
+    
+    // Determine department based on course code
+    if (stripos($course['code'], 'CS') === 0) {
+        $course['department'] = 'cs';
+    } elseif (stripos($course['code'], 'ENG') === 0) {
+        $course['department'] = 'eng';
+    } elseif (stripos($course['code'], 'MATH') === 0) {
+        $course['department'] = 'math';
+    } else {
+        $course['department'] = 'other';
+    }
+}
+
+// Apply search filter
+if ($search_term) {
+    $search_term_lower = strtolower($search_term);
+    $courses = array_filter($courses, function($course) use ($search_term_lower) {
+        return strpos(strtolower($course['code']), $search_term_lower) !== false ||
+               strpos(strtolower($course['title']), $search_term_lower) !== false ||
+               strpos(strtolower($course['teacher']), $search_term_lower) !== false ||
+               strpos(strtolower($course['description']), $search_term_lower) !== false;
+    });
+    $courses = array_values($courses); // Reindex array
+}
+
+// Apply category filter
+if ($filter !== 'all') {
+    if ($filter === 'cs') {
+        $courses = array_filter($courses, function($course) {
+            return $course['department'] === 'cs';
+        });
+    } elseif ($filter === 'eng') {
+        $courses = array_filter($courses, function($course) {
+            return $course['department'] === 'eng';
+        });
+    } elseif ($filter === 'active') {
+        $courses = array_filter($courses, function($course) {
+            return $course['status'] === 'active';
+        });
+    } elseif ($filter === 'completed') {
+        $courses = array_filter($courses, function($course) {
+            return $course['status'] === 'completed';
+        });
+    }
+    $courses = array_values($courses);
+}
+
+// Apply sorting
+if ($sort_by === 'code') {
+    usort($courses, function($a, $b) {
+        return strcmp($a['code'], $b['code']);
+    });
+} elseif ($sort_by === 'title') {
+    usort($courses, function($a, $b) {
+        return strcmp($a['title'], $b['title']);
+    });
+} elseif ($sort_by === 'credits') {
+    usort($courses, function($a, $b) {
+        return $b['credits'] - $a['credits'];
+    });
+} elseif ($sort_by === 'status') {
+    usort($courses, function($a, $b) {
+        return strcmp($a['status'], $b['status']);
+    });
+}
+
+// Calculate statistics
+$total_courses = count($courses);
+$cs_courses = count(array_filter($courses, function($course) {
+    return $course['department'] === 'cs';
+}));
+$other_courses = $total_courses - $cs_courses;
+$credits_hours = array_sum(array_column($courses, 'credits'));
+
+// Pagination
+$total_pages = ceil($total_courses / $courses_per_page);
+$current_page = max(1, min($current_page, $total_pages));
+$start_index = ($current_page - 1) * $courses_per_page;
+$paginated_courses = array_slice($courses, $start_index, $courses_per_page);
+
+// Handle course enrollment (if student)
+if ($role == 'student' && isset($_POST['enroll_course'])) {
+    $course_id = (int)$_POST['course_id'];
+    
+    try {
+        $query = "INSERT INTO enrollments (student_id, course_id) 
+                  VALUES (:student_id, :course_id)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':student_id', $user_id);
+        $stmt->bindParam(':course_id', $course_id);
+        
+        if ($stmt->execute()) {
+            $enrollment_success = "Successfully enrolled in course!";
+            // Refresh page to show updated list
+            header("Location: courses.php");
+            exit();
+        }
+    } catch (PDOException $e) {
+        $enrollment_error = "Already enrolled in this course!";
+    }
+}
+
+// Handle course drop
+if (isset($_GET['drop_course'])) {
+    $course_id = (int)$_GET['drop_course'];
+    
+    if ($role == 'student') {
+        $query = "DELETE FROM enrollments 
+                  WHERE student_id = :student_id AND course_id = :course_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':student_id', $user_id);
+        $stmt->bindParam(':course_id', $course_id);
+        $stmt->execute();
+        
+        $drop_success = "Successfully dropped the course!";
+        header("Location: courses.php");
+        exit();
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
