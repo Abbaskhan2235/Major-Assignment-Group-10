@@ -1,9 +1,160 @@
+<?php
+// dashboard.php
+
+session_start();
+require_once 'config/database.php';
+require_once 'includes/session.php';
+
+// Check if user is logged in
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get user data from session
+$user_id = $_SESSION['user_id'];
+$username = $_SESSION['username'];
+$full_name = $_SESSION['full_name'];
+$role = $_SESSION['role'];
+$email = $_SESSION['email'];
+
+// Database connection
+$database = new Database();
+$db = $database->getConnection();
+
+// Get user statistics based on role
+$total_courses = 0;
+$attendance_rate = 0;
+$current_gpa = 0;
+$pending_tasks = 0;
+
+if ($role == 'student') {
+    // Get enrolled courses count
+    $query = "SELECT COUNT(*) as total FROM enrollments WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total'];
+    
+    // Get average attendance rate
+    $query = "SELECT 
+                (COUNT(CASE WHEN status = 'present' THEN 1 END) * 100.0 / COUNT(*)) as attendance_rate
+              FROM attendance 
+              WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $attendance_rate = round($result['attendance_rate'] ?? 0, 1);
+    
+    // Get current GPA
+    $query = "SELECT AVG(percentage) as gpa FROM marks WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $current_gpa = round(($result['gpa'] ?? 0) / 25, 2); // Convert percentage to 4.0 scale
+    
+    // Get pending assignments (you'll need to create an assignments table)
+    $pending_tasks = 3; // Default value
+    
+} elseif ($role == 'teacher') {
+    // Teacher statistics
+    $query = "SELECT COUNT(*) as total FROM courses WHERE teacher_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total'];
+    
+    $attendance_rate = 98; // Default for teachers
+    $current_gpa = 0; // Not applicable for teachers
+    $pending_tasks = 5; // Default value
+} else {
+    // Admin statistics
+    $query = "SELECT COUNT(*) as total FROM users WHERE role = 'student'";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total']; // Repurposed as total students
+    
+    $attendance_rate = 95; // Default overall attendance
+    $current_gpa = 3.6; // Default overall GPA
+    $pending_tasks = 12; // Default pending tasks
+}
+
+// Get enrolled courses for students
+$enrolled_courses = [];
+if ($role == 'student') {
+    $query = "SELECT c.* FROM courses c
+              INNER JOIN enrollments e ON c.id = e.course_id
+              WHERE e.student_id = :user_id
+              LIMIT 5";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $enrolled_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Get upcoming events (timetable)
+$upcoming_events = [];
+$query = "SELECT 
+            c.course_code, 
+            c.course_name,
+            t.day_of_week,
+            t.start_time,
+            t.end_time,
+            t.room
+          FROM timetable t
+          INNER JOIN courses c ON t.course_id = c.id
+          WHERE t.day_of_week IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+          ORDER BY 
+            FIELD(t.day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),
+            t.start_time
+          LIMIT 4";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$upcoming_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get recent activity
+$recent_activity = [];
+if ($role == 'student') {
+    $query = "SELECT 
+                'Grade Updated' as title,
+                CONCAT('Your grade for ', c.course_code, ' is now ', 
+                       CASE 
+                         WHEN m.percentage >= 90 THEN 'A'
+                         WHEN m.percentage >= 80 THEN 'B'
+                         WHEN m.percentage >= 70 THEN 'C'
+                         WHEN m.percentage >= 60 THEN 'D'
+                         ELSE 'F'
+                       END) as description,
+                DATE_FORMAT(m.recorded_at, '%H:%i') as time_ago
+              FROM marks m
+              INNER JOIN courses c ON m.course_id = c.id
+              WHERE m.student_id = :user_id
+              ORDER BY m.recorded_at DESC
+              LIMIT 5";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $recent_activity = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Dashboard - Mini LMS</title>
+<title><?php echo ucfirst($role); ?> Dashboard - Mini LMS</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -26,33 +177,33 @@
     <nav class="sidebar-nav">
       <ul>
         <li class="active">
-          <a href="#">
+          <a href="dashboard.php">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="courses.php">
             <i class="fas fa-book-open"></i>
             <span>Courses</span>
-            <span class="badge">5</span>
+            <span class="badge"><?php echo $total_courses; ?></span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="timetable.php">
             <i class="fas fa-calendar-alt"></i>
             <span>Timetable</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="attendance.php">
             <i class="fas fa-chart-bar"></i>
             <span>Attendance</span>
-            <span class="badge">96%</span>
+            <span class="badge"><?php echo $attendance_rate; ?>%</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="marks.php">
             <i class="fas fa-chart-line"></i>
             <span>Grades</span>
           </a>
@@ -61,18 +212,19 @@
           <a href="#">
             <i class="fas fa-file-alt"></i>
             <span>Assignments</span>
-            <span class="badge badge-warning">2</span>
+            <span class="badge badge-warning"><?php echo $pending_tasks; ?></span>
           </a>
         </li>
+        <?php if ($role == 'admin'): ?>
         <li>
-          <a href="#">
-            <i class="fas fa-comments"></i>
-            <span>Messages</span>
-            <span class="badge badge-primary">3</span>
+          <a href="admin.php">
+            <i class="fas fa-users-cog"></i>
+            <span>Admin Panel</span>
           </a>
         </li>
+        <?php endif; ?>
         <li>
-          <a href="#">
+          <a href="settings.php">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
           </a>
@@ -97,7 +249,7 @@
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="top-bar-left">
-        <h1>Student Dashboard</h1>
+        <h1><?php echo ucfirst($role); ?> Dashboard</h1>
         <div class="breadcrumb">
           <span>Home</span> / <span>Dashboard</span>
         </div>
@@ -118,18 +270,18 @@
         
         <div class="user-dropdown">
           <div class="user-avatar">
-            <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff&size=128" alt="Student Avatar">
+            <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($full_name); ?>&background=6a11cb&color=fff&size=128" alt="User Avatar">
           </div>
           <div class="user-info">
-            <span class="user-name">John Doe</span>
-            <span class="user-role">Student</span>
+            <span class="user-name"><?php echo htmlspecialchars($full_name); ?></span>
+            <span class="user-role"><?php echo ucfirst($role); ?></span>
           </div>
           <i class="fas fa-chevron-down"></i>
         </div>
         
-        <button class="logout-btn">
+        <a href="?logout=true" class="logout-btn" onclick="return confirm('Are you sure you want to logout?');">
           <i class="fas fa-sign-out-alt"></i>
-        </button>
+        </a>
       </div>
     </div>
 
@@ -144,7 +296,7 @@
         <div class="profile-content">
           <div class="profile-avatar">
             <div class="avatar-container">
-              <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff&size=256" alt="Student Avatar">
+              <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($full_name); ?>&background=6a11cb&color=fff&size=256" alt="User Avatar">
               <span class="status-indicator active"></span>
             </div>
             <button class="edit-avatar-btn">
@@ -153,29 +305,31 @@
           </div>
           
           <div class="profile-info">
-            <h2 id="displayName">John Doe</h2>
-            <p class="student-id">ID: 14656</p>
+            <h2 id="displayName"><?php echo htmlspecialchars($full_name); ?></h2>
+            <p class="student-id">ID: <?php echo $user_id; ?></p>
             <div class="profile-meta">
               <div class="meta-item">
-                <i class="fas fa-university"></i>
-                <span>Computer Science</span>
+                <i class="fas fa-envelope"></i>
+                <span><?php echo htmlspecialchars($email); ?></span>
               </div>
               <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <span>Semester: 4th</span>
+                <i class="fas fa-user-tag"></i>
+                <span>Role: <?php echo ucfirst($role); ?></span>
               </div>
+              <?php if ($role == 'student'): ?>
               <div class="meta-item">
                 <i class="fas fa-star"></i>
-                <span>GPA: 3.75</span>
+                <span>GPA: <?php echo $current_gpa; ?></span>
               </div>
+              <?php endif; ?>
             </div>
           </div>
           
           <div class="profile-actions">
-            <button class="action-btn primary-btn">
+            <button class="action-btn primary-btn" onclick="window.location.href='profile.php'">
               <i class="fas fa-id-card"></i> View Profile
             </button>
-            <button class="action-btn secondary-btn">
+            <button class="action-btn secondary-btn" onclick="window.location.href='settings.php'">
               <i class="fas fa-cog"></i> Settings
             </button>
           </div>
@@ -183,20 +337,33 @@
         
         <div class="profile-stats">
           <div class="stat-item">
-            <div class="stat-value">5</div>
-            <div class="stat-label">Active Courses</div>
+            <div class="stat-value"><?php echo $total_courses; ?></div>
+            <div class="stat-label">
+              <?php echo ($role == 'admin') ? 'Total Students' : (($role == 'teacher') ? 'Teaching Courses' : 'Active Courses'); ?>
+            </div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">96%</div>
-            <div class="stat-label">Attendance</div>
+            <div class="stat-value"><?php echo $attendance_rate; ?>%</div>
+            <div class="stat-label">
+              <?php echo ($role == 'student') ? 'Attendance' : 'Overall Attendance'; ?>
+            </div>
           </div>
+          <?php if ($role == 'student'): ?>
           <div class="stat-item">
-            <div class="stat-value">3.75</div>
+            <div class="stat-value"><?php echo $current_gpa; ?></div>
             <div class="stat-label">Current GPA</div>
           </div>
+          <?php else: ?>
           <div class="stat-item">
-            <div class="stat-value">12</div>
-            <div class="stat-label">Assignments Due</div>
+            <div class="stat-value"><?php echo $current_gpa; ?></div>
+            <div class="stat-label">
+              <?php echo ($role == 'admin') ? 'Avg GPA' : 'Students'; ?>
+            </div>
+          </div>
+          <?php endif; ?>
+          <div class="stat-item">
+            <div class="stat-value"><?php echo $pending_tasks; ?></div>
+            <div class="stat-label">Pending Tasks</div>
           </div>
         </div>
       </div>
@@ -208,10 +375,13 @@
             <i class="fas fa-book-open"></i>
           </div>
           <div class="stat-details">
-            <div class="stat-number">5</div>
-            <div class="stat-title">Enrolled Courses</div>
+            <div class="stat-number"><?php echo $total_courses; ?></div>
+            <div class="stat-title">
+              <?php echo ($role == 'admin') ? 'Total Students' : (($role == 'teacher') ? 'Teaching Courses' : 'Enrolled Courses'); ?>
+            </div>
             <div class="stat-trend up">
-              <i class="fas fa-arrow-up"></i> 2 this semester
+              <i class="fas fa-arrow-up"></i> 
+              <?php echo ($role == 'student') ? 'This semester' : 'Active'; ?>
             </div>
           </div>
         </div>
@@ -221,36 +391,64 @@
             <i class="fas fa-calendar-check"></i>
           </div>
           <div class="stat-details">
-            <div class="stat-number">96%</div>
-            <div class="stat-title">Attendance Rate</div>
+            <div class="stat-number"><?php echo $attendance_rate; ?>%</div>
+            <div class="stat-title">
+              <?php echo ($role == 'student') ? 'Attendance Rate' : 'Overall Attendance'; ?>
+            </div>
             <div class="stat-trend up">
-              <i class="fas fa-arrow-up"></i> 4% from last month
+              <i class="fas fa-arrow-up"></i> 
+              <?php echo ($role == 'student') ? 'Good standing' : 'System wide'; ?>
             </div>
           </div>
         </div>
         
+        <?php if ($role == 'student'): ?>
         <div class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #3498db20, #2980b920); color: #3498db;">
             <i class="fas fa-chart-line"></i>
           </div>
           <div class="stat-details">
-            <div class="stat-number">3.75</div>
+            <div class="stat-number"><?php echo $current_gpa; ?></div>
             <div class="stat-title">Current GPA</div>
             <div class="stat-trend up">
-              <i class="fas fa-arrow-up"></i> 0.15 improvement
+              <i class="fas fa-arrow-up"></i> Good performance
             </div>
           </div>
         </div>
+        <?php else: ?>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #3498db20, #2980b920); color: #3498db;">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-details">
+            <div class="stat-number">
+              <?php 
+              if ($role == 'admin') {
+                echo '100+';
+              } else {
+                echo '50+';
+              }
+              ?>
+            </div>
+            <div class="stat-title">
+              <?php echo ($role == 'admin') ? 'Total Users' : 'Students'; ?>
+            </div>
+            <div class="stat-trend up">
+              <i class="fas fa-arrow-up"></i> Active
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
         
         <div class="stat-card">
           <div class="stat-icon" style="background: linear-gradient(135deg, #f39c1220, #e67e2220); color: #f39c12;">
             <i class="fas fa-clock"></i>
           </div>
           <div class="stat-details">
-            <div class="stat-number">12</div>
+            <div class="stat-number"><?php echo $pending_tasks; ?></div>
             <div class="stat-title">Pending Tasks</div>
             <div class="stat-trend down">
-              <i class="fas fa-arrow-down"></i> 3 completed
+              <i class="fas fa-arrow-down"></i> To be completed
             </div>
           </div>
         </div>
@@ -264,117 +462,171 @@
         </div>
         
         <div class="modules">
-          <div class="card">
+          <div class="card" onclick="window.location.href='courses.php'">
             <div class="card-icon" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
               <i class="fas fa-book-open"></i>
             </div>
             <h3>📘 Courses</h3>
-            <p>View enrolled courses, materials, and progress</p>
+            <p>View <?php echo ($role == 'student') ? 'enrolled' : (($role == 'teacher') ? 'teaching' : 'all'); ?> courses and materials</p>
             <div class="card-footer">
-              <span class="card-badge">5 active courses</span>
+              <span class="card-badge"><?php echo $total_courses; ?> <?php echo ($role == 'admin') ? 'students' : 'courses'; ?></span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" onclick="window.location.href='timetable.php'">
             <div class="card-icon" style="background: linear-gradient(135deg, #2ecc71, #1abc9c);">
               <i class="fas fa-calendar-alt"></i>
             </div>
             <h3>🕒 Timetable</h3>
-            <p>Your class schedule and upcoming sessions</p>
+            <p>Your <?php echo ($role == 'student') ? 'class schedule' : 'teaching schedule'; ?> and upcoming sessions</p>
             <div class="card-footer">
-              <span class="card-badge">Next: CS101 at 10:00 AM</span>
+              <span class="card-badge">
+                <?php if (!empty($upcoming_events)): ?>
+                Next: <?php echo $upcoming_events[0]['course_code']; ?>
+                <?php else: ?>
+                No upcoming
+                <?php endif; ?>
+              </span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" onclick="window.location.href='attendance.php'">
             <div class="card-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
               <i class="fas fa-chart-bar"></i>
             </div>
             <h3>📊 Attendance</h3>
-            <p>Your attendance record and analytics</p>
+            <p>
+              <?php if ($role == 'student'): ?>
+              Your attendance record and analytics
+              <?php elseif ($role == 'teacher'): ?>
+              Mark and manage student attendance
+              <?php else: ?>
+              View attendance reports
+              <?php endif; ?>
+            </p>
             <div class="card-footer">
-              <span class="card-badge">96% overall</span>
+              <span class="card-badge"><?php echo $attendance_rate; ?>% <?php echo ($role == 'student') ? 'overall' : 'rate'; ?></span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" onclick="window.location.href='marks.php'">
             <div class="card-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
               <i class="fas fa-chart-line"></i>
             </div>
-            <h3>📝 Internal Marks</h3>
-            <p>Your internal exam marks and performance</p>
+            <h3>
+              <?php if ($role == 'student'): ?>
+              📝 Grades
+              <?php elseif ($role == 'teacher'): ?>
+              📝 Grade Students
+              <?php else: ?>
+              📝 Grade Reports
+              <?php endif; ?>
+            </h3>
+            <p>
+              <?php if ($role == 'student'): ?>
+              Your marks and performance
+              <?php elseif ($role == 'teacher'): ?>
+              Enter and manage student grades
+              <?php else: ?>
+              View grade analytics
+              <?php endif; ?>
+            </p>
             <div class="card-footer">
-              <span class="card-badge">3.75 GPA</span>
+              <span class="card-badge">
+                <?php if ($role == 'student'): ?>
+                <?php echo $current_gpa; ?> GPA
+                <?php else: ?>
+                Manage
+                <?php endif; ?>
+              </span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
           
-          <div class="card">
+          <?php if ($role == 'admin'): ?>
+          <div class="card" onclick="window.location.href='admin.php'">
+            <div class="card-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <h3>⚙️ Admin Panel</h3>
+            <p>Manage users, courses, and system settings</p>
+            <div class="card-footer">
+              <span class="card-badge">System Control</span>
+              <button class="card-action">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          <?php else: ?>
+          <div class="card" onclick="window.location.href='#'">
             <div class="card-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
               <i class="fas fa-file-alt"></i>
             </div>
             <h3>📄 Assignments</h3>
-            <p>View and submit your pending assignments</p>
+            <p>View and <?php echo ($role == 'student') ? 'submit' : 'grade'; ?> assignments</p>
             <div class="card-footer">
-              <span class="card-badge badge-warning">3 pending</span>
+              <span class="card-badge badge-warning"><?php echo $pending_tasks; ?> pending</span>
+              <button class="card-action">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          <?php endif; ?>
+          
+          <div class="card" onclick="window.location.href='settings.php'">
+            <div class="card-icon" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
+              <i class="fas fa-cog"></i>
+            </div>
+            <h3>⚙️ Settings</h3>
+            <p>Manage your profile and account settings</p>
+            <div class="card-footer">
+              <span class="card-badge">Account Settings</span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
           
-          <div class="card">
+          <?php if ($role == 'student'): ?>
+          <div class="card" onclick="window.location.href='#'">
             <div class="card-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
               <i class="fas fa-graduation-cap"></i>
             </div>
-            <h3>🎓 Grades</h3>
-            <p>Check your grades and academic standing</p>
+            <h3>🎓 Progress</h3>
+            <p>Check your academic progress and standing</p>
             <div class="card-footer">
-              <span class="card-badge">View report card</span>
+              <span class="card-badge">View progress</span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
           
-          <div class="card">
-            <div class="card-icon" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
-              <i class="fas fa-comments"></i>
-            </div>
-            <h3>💬 Messages</h3>
-            <p>Communicate with instructors and peers</p>
-            <div class="card-footer">
-              <span class="card-badge badge-primary">2 unread</span>
-              <button class="card-action">
-                <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-          
-          <div class="card">
+          <div class="card" onclick="window.location.href='#'">
             <div class="card-icon" style="background: linear-gradient(135deg, #34495e, #2c3e50);">
               <i class="fas fa-download"></i>
             </div>
             <h3>📥 Resources</h3>
             <p>Access course materials and study resources</p>
             <div class="card-footer">
-              <span class="card-badge">12 new files</span>
+              <span class="card-badge">Download</span>
               <button class="card-action">
                 <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
+          <?php endif; ?>
         </div>
       </div>
       
@@ -383,61 +635,33 @@
         <div class="upcoming-events">
           <div class="section-header">
             <h3>Upcoming Events</h3>
-            <button class="view-all-btn">View All</button>
+            <button class="view-all-btn" onclick="window.location.href='timetable.php'">View All</button>
           </div>
           
           <div class="events-list">
-            <div class="event-item">
-              <div class="event-date">
-                <div class="event-day">Mon</div>
-                <div class="event-num">15</div>
+            <?php if (!empty($upcoming_events)): ?>
+              <?php foreach ($upcoming_events as $index => $event): ?>
+              <div class="event-item">
+                <div class="event-date">
+                  <div class="event-day"><?php echo substr($event['day_of_week'], 0, 3); ?></div>
+                  <div class="event-num"><?php echo ($index + 15) % 30 + 1; ?></div>
+                </div>
+                <div class="event-details">
+                  <h4><?php echo htmlspecialchars($event['course_code']); ?> - <?php echo htmlspecialchars($event['course_name']); ?></h4>
+                  <p><i class="fas fa-clock"></i> <?php echo date('g:i A', strtotime($event['start_time'])); ?> - <?php echo date('g:i A', strtotime($event['end_time'])); ?></p>
+                  <p><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($event['room']); ?></p>
+                </div>
+                <div class="event-status active"></div>
               </div>
-              <div class="event-details">
-                <h4>CS101 - Introduction to Programming</h4>
-                <p><i class="fas fa-clock"></i> 10:00 AM - 11:30 AM</p>
-                <p><i class="fas fa-map-marker-alt"></i> Room 302, CS Building</p>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="event-item">
+                <div class="event-details">
+                  <h4>No upcoming events</h4>
+                  <p>Check back later for scheduled sessions</p>
+                </div>
               </div>
-              <div class="event-status active"></div>
-            </div>
-            
-            <div class="event-item">
-              <div class="event-date">
-                <div class="event-day">Tue</div>
-                <div class="event-num">16</div>
-              </div>
-              <div class="event-details">
-                <h4>MATH201 - Calculus II Exam</h4>
-                <p><i class="fas fa-clock"></i> 9:00 AM - 11:00 AM</p>
-                <p><i class="fas fa-map-marker-alt"></i> Examination Hall A</p>
-              </div>
-              <div class="event-status warning"></div>
-            </div>
-            
-            <div class="event-item">
-              <div class="event-date">
-                <div class="event-day">Wed</div>
-                <div class="event-num">17</div>
-              </div>
-              <div class="event-details">
-                <h4>ENG101 - Presentation Submission</h4>
-                <p><i class="fas fa-clock"></i> 11:59 PM (Online)</p>
-                <p><i class="fas fa-exclamation-circle"></i> Assignment Due</p>
-              </div>
-              <div class="event-status urgent"></div>
-            </div>
-            
-            <div class="event-item">
-              <div class="event-date">
-                <div class="event-day">Fri</div>
-                <div class="event-num">19</div>
-              </div>
-              <div class="event-details">
-                <h4>CS102 - Data Structures Lab</h4>
-                <p><i class="fas fa-clock"></i> 2:00 PM - 4:00 PM</p>
-                <p><i class="fas fa-map-marker-alt"></i> Lab 4, CS Building</p>
-              </div>
-              <div class="event-status active"></div>
-            </div>
+            <?php endif; ?>
           </div>
         </div>
         
@@ -448,60 +672,41 @@
           </div>
           
           <div class="activity-list">
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-file-upload"></i>
+            <?php if (!empty($recent_activity)): ?>
+              <?php foreach ($recent_activity as $activity): ?>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="activity-details">
+                  <h4><?php echo htmlspecialchars($activity['title']); ?></h4>
+                  <p><?php echo htmlspecialchars($activity['description']); ?></p>
+                  <span class="activity-time"><?php echo $activity['time_ago']; ?> ago</span>
+                </div>
               </div>
-              <div class="activity-details">
-                <h4>Assignment Submitted</h4>
-                <p>You submitted "CS101 Assignment 3"</p>
-                <span class="activity-time">2 hours ago</span>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-details">
+                  <h4>Welcome to Mini LMS!</h4>
+                  <p>You have successfully logged in. Start exploring your dashboard.</p>
+                  <span class="activity-time">Just now</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-chart-line"></i>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="activity-details">
+                  <h4>System Updated</h4>
+                  <p>New features have been added to your dashboard</p>
+                  <span class="activity-time">Today</span>
+                </div>
               </div>
-              <div class="activity-details">
-                <h4>Grade Updated</h4>
-                <p>Your grade for "MATH201 Midterm" is now A-</p>
-                <span class="activity-time">Yesterday</span>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-comment"></i>
-              </div>
-              <div class="activity-details">
-                <h4>New Message</h4>
-                <p>Dr. Ahmed sent you a message about your project</p>
-                <span class="activity-time">2 days ago</span>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-calendar-plus"></i>
-              </div>
-              <div class="activity-details">
-                <h4>Course Added</h4>
-                <p>You enrolled in "CS201 - Object-Oriented Programming"</p>
-                <span class="activity-time">3 days ago</span>
-              </div>
-            </div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">
-                <i class="fas fa-download"></i>
-              </div>
-              <div class="activity-details">
-                <h4>New Material</h4>
-                <p>New lecture notes uploaded for "ENG101"</p>
-                <span class="activity-time">4 days ago</span>
-              </div>
-            </div>
+            <?php endif; ?>
           </div>
         </div>
       </div>
@@ -520,7 +725,7 @@
             <a href="#">Contact Us</a>
           </div>
           <div class="footer-copyright">
-            © 2023 MiniLMS. All rights reserved.
+            © <?php echo date('Y'); ?> MiniLMS. All rights reserved.
           </div>
         </div>
       </div>
@@ -867,6 +1072,7 @@
     justify-content: center;
     font-size: 1.2rem;
     transition: all 0.3s ease;
+    text-decoration: none;
   }
 
   .logout-btn:hover {
@@ -1174,6 +1380,7 @@
     display: flex;
     flex-direction: column;
     border-top: 4px solid transparent;
+    cursor: pointer;
   }
 
   .card:hover {
@@ -1644,6 +1851,50 @@
     }
   }
 </style>
+
+<script>
+  // Sidebar toggle for mobile
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    menuToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('active');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      if (window.innerWidth <= 768 && 
+          !sidebar.contains(event.target) && 
+          !menuToggle.contains(event.target) && 
+          sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+    
+    // Auto-hide sidebar on mobile when clicking a link
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
+      });
+    });
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      const cardAction = card.querySelector('.card-action');
+      card.addEventListener('mouseenter', function() {
+        cardAction.style.transform = 'rotate(90deg)';
+      });
+      card.addEventListener('mouseleave', function() {
+        cardAction.style.transform = 'rotate(0deg)';
+      });
+    });
+  });
+</script>
 
 </body>
 </html>
