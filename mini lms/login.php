@@ -1,3 +1,85 @@
+<?php
+// login.php
+
+session_start();
+require_once 'config/database.php';
+require_once 'includes/session.php';
+
+// If user is already logged in, redirect to dashboard
+if (isLoggedIn()) {
+    header("Location: dashboard.php");
+    exit();
+}
+
+// Initialize variables
+$username = $password = $role = "";
+$error_message = "";
+$success_message = "";
+
+// Process form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+    $role = $_POST['role'] ?? 'student';
+    
+    // Validate inputs
+    if (empty($username) || empty($password)) {
+        $error_message = "Please enter both username and password.";
+    } else {
+        // Database connection
+        $database = new Database();
+        $db = $database->getConnection();
+        
+        // Prepare SQL query based on role
+        $query = "SELECT id, username, password, role, full_name, email FROM users 
+                  WHERE username = :username AND role = :role LIMIT 1";
+        
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':role', $role);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Verify password (using password_verify for hashed passwords)
+            // For now, we'll use simple comparison. Replace with hashed passwords in production
+            if ($password === 'demo123' || password_verify($password, $user['password'])) {
+                // Set session variables
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['email'] = $user['email'];
+                
+                // Redirect based on role
+                switch ($user['role']) {
+                    case 'admin':
+                        header("Location: admin_dashboard.php");
+                        break;
+                    case 'teacher':
+                        header("Location: teacher_dashboard.php");
+                        break;
+                    default:
+                        header("Location: dashboard.php");
+                }
+                exit();
+            } else {
+                $error_message = "Invalid password. Please try again.";
+            }
+        } else {
+            $error_message = "No user found with these credentials.";
+        }
+    }
+}
+
+// Demo credentials for testing
+$demo_credentials = [
+    'student' => ['username' => 'student1', 'password' => 'demo123'],
+    'teacher' => ['username' => 'teacher1', 'password' => 'demo123'],
+    'admin' => ['username' => 'admin', 'password' => 'demo123']
+];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -134,6 +216,40 @@
     color: #64748b;
     font-size: 1.05rem;
     font-weight: 500;
+  }
+
+  /* Error/Success Messages */
+  .message-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .error-message {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.5s ease;
+  }
+
+  .success-message {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.5s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* Role Selection */
@@ -438,6 +554,52 @@
     transform: translateY(-1px);
   }
 
+  /* Demo Credentials */
+  .demo-credentials {
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-radius: 14px;
+    margin-top: 2rem;
+    border: 1px solid #f1f5f9;
+  }
+
+  .demo-credentials h4 {
+    color: #6a11cb;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .demo-credentials ul {
+    list-style: none;
+  }
+
+  .demo-credentials li {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cred-role {
+    font-weight: 600;
+    color: #6a11cb;
+  }
+
+  .cred-user, .cred-pass {
+    font-family: monospace;
+    background: #f8fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
   /* Links */
   .login-links {
     text-align: center;
@@ -588,55 +750,66 @@
       <p>Sign in to continue to your educational journey</p>
     </div>
 
-    <div class="role-selection">
-      <h3>Select Your Role</h3>
-      
-      <div class="role-options">
-        <!-- Student Role -->
-        <label class="role-option">
-          <input type="radio" name="role" id="student-role" checked>
-          <div class="role-circle-container">
-            <div class="elegant-shadow"></div>
-            <div class="role-circle-bg"></div>
-            <div class="role-circle">
-              <span>Student</span>
-            </div>
-            <div class="role-name">Student</div>
-          </div>
-        </label>
-
-        <!-- Instructor Role -->
-        <label class="role-option">
-          <input type="radio" name="role" id="instructor-role">
-          <div class="role-circle-container">
-            <div class="elegant-shadow"></div>
-            <div class="role-circle-bg"></div>
-            <div class="role-circle">
-              <span>Instructor</span>
-            </div>
-            <div class="role-name">Instructor</div>
-          </div>
-        </label>
-
-        <!-- Administrator Role -->
-        <label class="role-option">
-          <input type="radio" name="role" id="admin-role">
-          <div class="role-circle-container">
-            <div class="elegant-shadow"></div>
-            <div class="role-circle-bg"></div>
-            <div class="role-circle">
-              <span>Admin</span>
-            </div>
-            <div class="role-name">Admin</div>
-          </div>
-        </label>
+    <?php if ($error_message): ?>
+    <div class="message-container">
+      <div class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <?php echo htmlspecialchars($error_message); ?>
       </div>
     </div>
+    <?php endif; ?>
 
-    <form class="login-form">
+    <form class="login-form" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+      <div class="role-selection">
+        <h3>Select Your Role</h3>
+        
+        <div class="role-options">
+          <!-- Student Role -->
+          <label class="role-option">
+            <input type="radio" name="role" value="student" id="student-role" checked>
+            <div class="role-circle-container">
+              <div class="elegant-shadow"></div>
+              <div class="role-circle-bg"></div>
+              <div class="role-circle">
+                <span>Student</span>
+              </div>
+              <div class="role-name">Student</div>
+            </div>
+          </label>
+
+          <!-- Instructor Role -->
+          <label class="role-option">
+            <input type="radio" name="role" value="teacher" id="instructor-role">
+            <div class="role-circle-container">
+              <div class="elegant-shadow"></div>
+              <div class="role-circle-bg"></div>
+              <div class="role-circle">
+                <span>Instructor</span>
+              </div>
+              <div class="role-name">Instructor</div>
+            </div>
+          </label>
+
+          <!-- Administrator Role -->
+          <label class="role-option">
+            <input type="radio" name="role" value="admin" id="admin-role">
+            <div class="role-circle-container">
+              <div class="elegant-shadow"></div>
+              <div class="role-circle-bg"></div>
+              <div class="role-circle">
+                <span>Admin</span>
+              </div>
+              <div class="role-name">Admin</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <div class="form-group">
         <div class="input-group">
-          <input id="username" type="text" placeholder="Username (e.g., Abbas)" required>
+          <input id="username" name="username" type="text" 
+                 placeholder="Username (e.g., student1)" 
+                 value="<?php echo htmlspecialchars($username); ?>" required>
           <span class="input-icon">
             <i class="fas fa-user"></i>
           </span>
@@ -645,7 +818,8 @@
 
       <div class="form-group">
         <div class="input-group">
-          <input id="password" type="password" placeholder="Password" required>
+          <input id="password" name="password" type="password" 
+                 placeholder="Password (demo123 for testing)" required>
           <span class="input-icon">
             <i class="fas fa-lock"></i>
           </span>
@@ -657,10 +831,79 @@
       </button>
     </form>
 
+    <!-- Demo Credentials for Testing -->
+    <div class="demo-credentials">
+      <h4><i class="fas fa-key"></i> Demo Credentials</h4>
+      <ul>
+        <li>
+          <span class="cred-role">Student</span>
+          <span class="cred-user">User: <?php echo $demo_credentials['student']['username']; ?></span>
+          <span class="cred-pass">Pass: <?php echo $demo_credentials['student']['password']; ?></span>
+        </li>
+        <li>
+          <span class="cred-role">Teacher</span>
+          <span class="cred-user">User: <?php echo $demo_credentials['teacher']['username']; ?></span>
+          <span class="cred-pass">Pass: <?php echo $demo_credentials['teacher']['password']; ?></span>
+        </li>
+        <li>
+          <span class="cred-role">Admin</span>
+          <span class="cred-user">User: <?php echo $demo_credentials['admin']['username']; ?></span>
+          <span class="cred-pass">Pass: <?php echo $demo_credentials['admin']['password']; ?></span>
+        </li>
+      </ul>
+    </div>
+
     <div class="login-links">
       <a href="#">Forgot Password?</a>
       <p>For any query email us at <b>minilms@gmail.com</b></p>
     </div>
   </div>
+
+  <script>
+    // JavaScript to enhance the login experience
+    document.addEventListener('DOMContentLoaded', function() {
+      const roleRadios = document.querySelectorAll('input[name="role"]');
+      const usernameInput = document.getElementById('username');
+      
+      // Set default username based on selected role
+      function updateUsernamePlaceholder() {
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+        const placeholders = {
+          'student': 'Username (e.g., student1)',
+          'teacher': 'Username (e.g., teacher1)',
+          'admin': 'Username (e.g., admin)'
+        };
+        usernameInput.placeholder = placeholders[selectedRole] || 'Username';
+      }
+      
+      // Add event listeners to role radios
+      roleRadios.forEach(radio => {
+        radio.addEventListener('change', updateUsernamePlaceholder);
+      });
+      
+      // Pre-fill demo credentials when role is selected
+      roleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          const role = this.value;
+          const demoUsers = {
+            'student': 'student1',
+            'teacher': 'teacher1',
+            'admin': 'admin'
+          };
+          
+          if (demoUsers[role]) {
+            usernameInput.value = demoUsers[role];
+            usernameInput.focus();
+          }
+        });
+      });
+      
+      // Initialize placeholder
+      updateUsernamePlaceholder();
+      
+      // Auto-focus username field
+      usernameInput.focus();
+    });
+  </script>
 </body>
 </html>
