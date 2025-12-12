@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard - Mini LMS</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET & BASE STYLES ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== TOP NAVIGATION BAR ===== */
+  .top-bar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 1.2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo i {
+    font-size: 1.8rem;
+    color: #6a11cb;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
+
+  .logo h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .user-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .notifications {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4757;
+    color: white;
+    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+
+  .logout-btn {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+  }
+
+  .logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 65, 108, 0.4);
+  }
+
+  /* ===== MAIN CONTAINER ===== */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 2rem;
+  }
+
+  /* ===== PROFILE SECTION ===== */
+  .profile-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    height: fit-content;
+    position: sticky;
+    top: 6rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .profile-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .profile-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid transparent;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%) border-box;
+    padding: 3px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  .profile-info h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+    margin-bottom: 0.3rem;
+  }
+
+  .profile-info p {
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+
+  .student-id {
+    background: linear-gradient(135deg, #6a11cb20 0%, #2575fc20 100%);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    color: #6a11cb;
+    display: inline-block;
+    margin-top: 0.8rem;
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-item:hover {
+    transform: translateY(-5px);
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .action-btn:hover {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    transform: translateX(5px);
+  }
+
+  .action-btn i {
+    font-size: 1.2rem;
+  }
+
+  /* ===== DASHBOARD CONTENT ===== */
+  .dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .welcome-section {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(106, 17, 203, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .welcome-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+  }
+
+  .welcome-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-section p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .date-display {
+    position: absolute;
+    bottom: 2rem;
+    right: 2.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.7rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    backdrop-filter: blur(10px);
+  }
+
+  /* ===== MODULES/MAIN CARDS ===== */
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    border-top: 4px solid transparent;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 100%);
+    z-index: 0;
+  }
+
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .card:nth-child(1) {
+    border-top-color: #6a11cb;
+  }
+
+  .card:nth-child(2) {
+    border-top-color: #2ecc71;
+  }
+
+  .card:nth-child(3) {
+    border-top-color: #f39c12;
+  }
+
+  .card:nth-child(4) {
+    border-top-color: #3498db;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .card:nth-child(1) .card-icon {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .card:nth-child(2) .card-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .card:nth-child(3) .card-icon {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  .card:nth-child(4) .card-icon {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  }
+
+  .card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+    margin-bottom: 0.8rem;
+  }
+
+  .card p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+
+  .card-arrow {
+    color: #6a11cb;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover .card-arrow {
+    transform: translateX(5px);
+  }
+
+  /* ===== UPCOMING CLASSES ===== */
+  .upcoming-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .section-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .section-header h3 i {
+    color: #6a11cb;
+  }
+
+  .view-all {
+    color: #6a11cb;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .view-all:hover {
+    text-decoration: underline;
+  }
+
+  .upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem;
+    border-radius: 15px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .upcoming-item:hover {
+    background: #eef2f7;
+    transform: translateX(5px);
+  }
+
+  .class-time {
+    background: white;
+    padding: 0.8rem;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 100px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .class-time .time {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+  }
+
+  .class-time .duration {
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  .class-details {
+    flex: 1;
+  }
+
+  .class-details h4 {
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    margin-bottom: 0.3rem;
+  }
+
+  .class-details p {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .class-room {
+    background: #e8f4fc;
+    color: #3498db;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 1200px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+    
+    .profile-section {
+      position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 1.5rem;
+    }
+    
+    .top-bar {
+      padding: 1rem 1.5rem;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .modules {
+      grid-template-columns: 1fr;
+    }
+    
+    .welcome-section h2 {
+      font-size: 1.8rem;
+    }
+    
+    .profile-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .welcome-section {
+      padding: 1.5rem;
+    }
+    
+    .card, .upcoming-section, .profile-section {
+      padding: 1.5rem;
+    }
+    
+    .date-display {
+      position: static;
+      margin-top: 1rem;
+      display: inline-block;
+    }
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+
+  .animate-card {
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+
+  /* ===== NOTIFICATION PANEL ===== */
+  .notification-panel {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .notification-header {
+    padding: 1.2rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 600;
+    color: #1a1a2e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .notification-list {
+    padding: 0.5rem;
+  }
+
+  .notification-item {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    background: #f8fafc;
+    display: flex;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .notification-item:hover {
+    background: #eef2f7;
+  }
+
+  .notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .notification-content {
+    flex: 1;
+  }
+
+  .notification-title {
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.2rem;
+  }
+
+  .notification-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  /* ===== LOADING SKELETON ===== */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  /* ===== LOGOUT MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    animation: fadeIn 0.3s ease 0.1s both;
+  }
+
+  .modal-content h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+  }
+
+  .modal-content p {
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .modal-btn {
+    padding: 0.9rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+  }
+
+  .modal-btn.confirm {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3);
+  }
+
+  .modal-btn.cancel {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .modal-btn:hover {
+    transform: translateY(-3px);
+  }
+
+  /* ===== SCROLLBAR STYLING ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a0cb9 0%, #1c65e0 100%);
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Top Navigation Bar -->
+<div class="top-bar">
+  <div class="logo">
+    <i class="fas fa-graduation-cap"></i>
+    <h1>Mini LMS Dashboard</h1>
+  </div>
+  
+  <div class="user-controls">
+    <div class="notifications" id="notification-btn">
+      <i class="fas fa-bell" style="font-size: 1.3rem;"></i>
+      <div class="notification-badge" id="notification-count">3</div>
+    </div>
+    
+    <button class="logout-btn" id="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </div>
+</div>
+
+<!-- Notification Panel -->
+<div class="notification-panel" id="notification-panel">
+  <div class="notification-header">
+    <span>Notifications</span>
+    <button id="clear-notifications" style="background: none; border: none; color: #6a11cb; cursor: pointer; font-size: 0.9rem;">
+      Clear All
+    </button>
+  </div>
+  <div class="notification-list" id="notification-list">
+    <!-- Notifications will be populated by JavaScript -->
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+  <!-- Left Column - Profile Section -->
+  <div class="profile-section">
+    <div class="profile-box">
+      <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff&size=200" alt="Student" class="profile-img" id="profile-img">
+      <div class="profile-info">
+        <h3 id="displayName">John Doe</h3>
+        <p>Computer Science Student</p>
+        <div class="student-id">ID: 14656</div>
+      </div>
+    </div>
+    
+    <div class="profile-stats">
+      <div class="stat-item">
+        <div class="stat-value" id="course-count">5</div>
+        <div class="stat-label">Courses</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="attendance-percentage">87%</div>
+        <div class="stat-label">Attendance</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="gpa-value">3.8</div>
+        <div class="stat-label">GPA</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="assignment-count">12</div>
+        <div class="stat-label">Assignments</div>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button class="action-btn" id="profile-btn">
+        <i class="fas fa-user-circle"></i> Edit Profile
+      </button>
+      <button class="action-btn" id="settings-btn">
+        <i class="fas fa-cog"></i> Settings
+      </button>
+      <button class="action-btn" id="help-btn">
+        <i class="fas fa-question-circle"></i> Help Center
+      </button>
+    </div>
+  </div>
+  
+  <!-- Right Column - Dashboard Content -->
+  <div class="dashboard-content">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h2 id="welcome-message">Good Morning, John!</h2>
+      <p>Welcome back to your learning dashboard. You have <strong>2 classes</strong> today and <strong>1 pending assignment</strong>.</p>
+      <div class="date-display" id="current-date">Monday, March 18, 2024</div>
+    </div>
+    
+    <!-- Main Modules/Cards -->
+    <div class="modules">
+      <!-- Courses Card -->
+      <div class="card animate-card" id="courses-card">
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <h2>📘 Courses</h2>
+          <p>View enrolled courses, access materials, and track your progress in each subject.</p>
+          <div class="card-footer">
+            <span>5 enrolled courses</span>
+            <i class="fas fa-arrow-right card-arrow"></i>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Timetable Card -->
+      <div class="card animate-card" id="timetable-card">
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <h2>🕒 Timetable</h2>
+          <p>Your class schedule, upcoming exams, and academic calendar for the semester.</p>
+          <div class="card-footer">
+            <span>View weekly schedule</span>
+            <i class="fas fa-arrow-right card-arrow"></i>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Attendance Card -->
+      <div class="card animate-card" id="attendance-card">
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h2>📊 Attendance</h2>
+          <p>Track your attendance record, view statistics, and download attendance reports.</p>
+          <div class="card-footer">
+            <span>87% overall attendance</span>
+            <i class="fas fa-arrow-right card-arrow"></i>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Internal Marks Card -->
+      <div class="card animate-card" id="marks-card">
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h2>📝 Internal Marks</h2>
+          <p>View your internal exam marks, assignment scores, and performance analytics.</p>
+          <div class="card-footer">
+            <span>Last updated: 2 days ago</span>
+            <i class="fas fa-arrow-right card-arrow"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Upcoming Classes Section -->
+    <div class="upcoming-section">
+      <div class="section-header">
+        <h3><i class="fas fa-clock"></i> Upcoming Classes</h3>
+        <div class="view-all" id="view-timetable">View Full Timetable</div>
+      </div>
+      
+      <div class="upcoming-list" id="upcoming-classes">
+        <!-- Upcoming classes will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal-overlay" id="logout-modal" style="display: none;">
+  <div class="modal-content">
+    <h3>Confirm Logout</h3>
+    <p>Are you sure you want to logout from your account? You'll need to login again to access your dashboard.</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="cancel-logout">Cancel</button>
+      <button class="modal-btn confirm" id="confirm-logout">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ====================
+  // DASHBOARD DATA
+  // ====================
+  const studentData = {
+    name: "John Doe",
+    id: "14656",
+    major: "Computer Science",
+    semester: "Spring 2024",
+    courses: 5,
+    attendance: 87,
+    gpa: 3.8,
+    assignments: 12
+  };
+
+  const notifications = [
+    { id: 1, type: "assignment", title: "New Assignment Posted", content: "Data Structures Assignment 3 is now available", time: "2 hours ago", icon: "fa-file-alt", color: "#6a11cb" },
+    { id: 2, type: "announcement", title: "Class Cancelled", content: "Programming class on Wednesday is cancelled", time: "1 day ago", icon: "fa-bullhorn", color: "#f39c12" },
+    { id: 3, type: "grade", title: "Grade Updated", content: "Your Calculus II midterm grade has been posted", time: "3 days ago", icon: "fa-chart-line", color: "#2ecc71" },
+    { id: 4, type: "reminder", title: "Fee Payment Reminder", content: "Last date for semester fee payment is March 25", time: "5 days ago", icon: "fa-exclamation-circle", color: "#e74c3c" }
+  ];
+
+  const upcomingClasses = [
+    { id: 1, course: "Data Structures", code: "CS201", time: "09:00 AM", duration: "1h 30m", room: "Lab 105", instructor: "Sir Bilal" },
+    { id: 2, course: "Communication Skills", code: "ENG101", time: "02:00 PM", duration: "1h 30m", room: "Room 201", instructor: "Ma'am Sana" },
+    { id: 3, course: "Database Systems", code: "CS401", time: "11:00 AM", duration: "2h", room: "Lab 208", instructor: "Prof. Brown" }
+  ];
+
+  // ====================
+  // DOM ELEMENTS
+  // ====================
+  const displayNameEl = document.getElementById('displayName');
+  const welcomeMessageEl = document.getElementById('welcome-message');
+  const currentDateEl = document.getElementById('current-date');
+  const notificationBtn = document.getElementById('notification-btn');
+  const notificationPanel = document.getElementById('notification-panel');
+  const notificationList = document.getElementById('notification-list');
+  const notificationCount = document.getElementById('notification-count');
+  const logoutBtn = document.getElementById('logout-btn');
+  const logoutModal = document.getElementById('logout-modal');
+  const cancelLogoutBtn = document.getElementById('cancel-logout');
+  const confirmLogoutBtn = document.getElementById('confirm-logout');
+  const clearNotificationsBtn = document.getElementById('clear-notifications');
+  const upcomingClassesEl = document.getElementById('upcoming-classes');
+  const profileImg = document.getElementById('profile-img');
+
+  // Dashboard cards
+  const coursesCard = document.getElementById('courses-card');
+  const timetableCard = document.getElementById('timetable-card');
+  const attendanceCard = document.getElementById('attendance-card');
+  const marksCard = document.getElementById('marks-card');
+  const viewTimetableBtn = document.getElementById('view-timetable');
+
+  // Stats elements
+  const courseCountEl = document.getElementById('course-count');
+  const attendancePercentageEl = document.getElementById('attendance-percentage');
+  const gpaValueEl = document.getElementById('gpa-value');
+  const assignmentCountEl = document.getElementById('assignment-count');
+
+  // Quick action buttons
+  const profileBtn = document.getElementById('profile-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const helpBtn = document.getElementById('help-btn');
+
+  // ====================
+  // UTILITY FUNCTIONS
+  // ====================
+  
+  /**
+   * Formats date to display in a readable format
+   * @returns {string} Formatted date string
+   */
+  function getFormattedDate() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return now.toLocaleDateString('en-US', options);
+  }
+
+  /**
+   * Gets appropriate greeting based on time of day
+   * @returns {string} Greeting message
+   */
+  function getTimeBasedGreeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  /**
+   * Updates student statistics on the dashboard
+   */
+  function updateStudentStats() {
+    displayNameEl.textContent = studentData.name;
+    welcomeMessageEl.textContent = `${getTimeBasedGreeting()}, ${studentData.name.split(' ')[0]}!`;
+    currentDateEl.textContent = getFormattedDate();
+    
+    courseCountEl.textContent = studentData.courses;
+    attendancePercentageEl.textContent = `${studentData.attendance}%`;
+    gpaValueEl.textContent = studentData.gpa;
+    assignmentCountEl.textContent = studentData.assignments;
+  }
+
+  /**
+   * Populates the notification panel with notifications
+   */
+  function populateNotifications() {
+    notificationList.innerHTML = '';
+    
+    if (notifications.length === 0) {
+      notificationList.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+          <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+          <p>No notifications yet</p>
+        </div>
+      `;
+      notificationCount.textContent = '0';
+      return;
+    }
+    
+    notifications.forEach(notification => {
+      const notificationEl = document.createElement('div');
+      notificationEl.className = 'notification-item';
+      notificationEl.innerHTML = `
+        <div class="notification-icon" style="background: ${notification.color}">
+          <i class="fas ${notification.icon}"></i>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">${notification.title}</div>
+          <div style="color: #64748b; font-size: 0.9rem;">${notification.content}</div>
+          <div class="notification-time">${notification.time}</div>
+        </div>
+      `;
+      
+      notificationEl.addEventListener('click', () => {
+        showNotificationToast(notification.title, notification.content);
+        // Remove notification when clicked
+        const index = notifications.findIndex(n => n.id === notification.id);
+        if (index !== -1) {
+          notifications.splice(index, 1);
+          populateNotifications();
+        }
+      });
+      
+      notificationList.appendChild(notificationEl);
+    });
+    
+    notificationCount.textContent = notifications.length;
+  }
+
+  /**
+   * Populates upcoming classes section
+   */
+  function populateUpcomingClasses() {
+    upcomingClassesEl.innerHTML = '';
+    
+    upcomingClasses.forEach(cls => {
+      const classEl = document.createElement('div');
+      classEl.className = 'upcoming-item';
+      classEl.innerHTML = `
+        <div class="class-time">
+          <div class="time">${cls.time}</div>
+          <div class="duration">${cls.duration}</div>
+        </div>
+        <div class="class-details">
+          <h4>${cls.course} (${cls.code})</h4>
+          <p>${cls.instructor}</p>
+        </div>
+        <div class="class-room">${cls.room}</div>
+      `;
+      
+      classEl.addEventListener('click', () => {
+        showToast(`Navigating to ${cls.course} details`);
+        // In a real app, this would navigate to class details
+      });
+      
+      upcomingClassesEl.appendChild(classEl);
+    });
+  }
+
+  /**
+   * Shows a toast notification
+   * @param {string} title - Toast title
+   * @param {string} message - Toast message
+   * @param {string} type - Type of toast (success, error, info, warning)
+   */
+  function showToast(title, message = '', type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: white;
+      padding: 1.2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      z-index: 1002;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: 350px;
+      animation: fadeIn 0.3s ease;
+      border-left: 4px solid ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db'};
+    `;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-times-circle' : 
+                type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <div style="color: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db'}; font-size: 1.5rem;">
+        <i class="fas ${icon}"></i>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: #1a1a2e; margin-bottom: 0.3rem;">${title}</div>
+        <div style="color: #64748b; font-size: 0.9rem;">${message}</div>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+  /**
+   * Shows a notification toast
+   * @param {string} title - Notification title
+   * @param {string} content - Notification content
+   */
+  function showNotificationToast(title, content) {
+    showToast(title, content, 'info');
+  }
+
+  /**
+   * Simulates logout process
+   */
+  function performLogout() {
+    showToast('Logging out...', 'Redirecting to login page', 'info');
+    
+    // Disable buttons during logout
+    logoutBtn.disabled = true;
+    logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      showToast('Logged out successfully', 'You have been logged out of your account', 'success');
+      
+      // In a real app, this would redirect to login page
+      // window.location.href = 'login.html';
+      
+      // For demo, reset the button after 2 seconds
+      setTimeout(() => {
+        logoutBtn.disabled = false;
+        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        logoutModal.style.display = 'none';
+      }, 2000);
+    }, 1500);
+  }
+
+  /**
+   * Toggles notification panel visibility
+   */
+  function toggleNotificationPanel() {
+    if (notificationPanel.style.display === 'block') {
+      notificationPanel.style.display = 'none';
+    } else {
+      notificationPanel.style.display = 'block';
+      // Populate notifications when panel is opened
+      populateNotifications();
+    }
+  }
+
+  // ====================
+  // EVENT LISTENERS
+  // ====================
+
+  // Notification button click
+  notificationBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleNotificationPanel();
+  });
+
+  // Close notification panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+      notificationPanel.style.display = 'none';
+    }
+  });
+
+  // Logout button click
+  logoutBtn.addEventListener('click', () => {
+    logoutModal.style.display = 'flex';
+  });
+
+  // Cancel logout
+  cancelLogoutBtn.addEventListener('click', () => {
+    logoutModal.style.display = 'none';
+  });
+
+  // Confirm logout
+  confirmLogoutBtn.addEventListener('click', performLogout);
+
+  // Clear all notifications
+  clearNotificationsBtn.addEventListener('click', () => {
+    if (notifications.length > 0) {
+      notifications.length = 0; // Clear array
+      populateNotifications();
+      showToast('Notifications cleared', 'All notifications have been removed', 'success');
+    }
+  });
+
+  // Dashboard card clicks (navigation)
+  coursesCard.addEventListener('click', () => {
+    showToast('Navigating to Courses', 'Loading your enrolled courses...', 'info');
+    // In a real app: window.location.href = 'courses.html';
+    // For demo, simulate navigation
+    simulateNavigation('courses');
+  });
+
+  timetableCard.addEventListener('click', () => {
+    showToast('Navigating to Timetable', 'Loading your class schedule...', 'info');
+    simulateNavigation('timetable');
+  });
+
+  attendanceCard.addEventListener('click', () => {
+    showToast('Navigating to Attendance', 'Loading your attendance record...', 'info');
+    simulateNavigation('attendance');
+  });
+
+  marksCard.addEventListener('click', () => {
+    showToast('Navigating to Internal Marks', 'Loading your marks and grades...', 'info');
+    simulateNavigation('marks');
+  });
+
+  // View full timetable
+  viewTimetableBtn.addEventListener('click', () => {
+    showToast('Opening Full Timetable', 'Loading complete timetable view...', 'info');
+    simulateNavigation('timetable');
+  });
+
+  // Quick action buttons
+  profileBtn.addEventListener('click', () => {
+    showToast('Edit Profile', 'Opening profile editor...', 'info');
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    showToast('Settings', 'Opening system settings...', 'info');
+  });
+
+  helpBtn.addEventListener('click', () => {
+    showToast('Help Center', 'Opening help and support resources...', 'info');
+  });
+
+  // ====================
+  // SIMULATION FUNCTIONS
+  // ====================
+
+  /**
+   * Simulates navigation to different pages
+   * @param {string} page - Page to navigate to
+   */
+  function simulateNavigation(page) {
+    // Add loading animation to all cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      card.style.opacity = '0.7';
+      card.style.pointerEvents = 'none';
+    });
+    
+    // Simulate loading delay
+    setTimeout(() => {
+      cards.forEach(card => {
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+      });
+      
+      // Show a more specific toast for each page
+      const pageNames = {
+        courses: 'Courses Page',
+        timetable: 'Timetable Page',
+        attendance: 'Attendance Page',
+        marks: 'Internal Marks Page'
+      };
+      
+      showToast(`Navigated to ${pageNames[page]}`, 'This is a simulation. In a real app, you would be redirected.', 'success');
+    }, 800);
+  }
+
+  /**
+   * Simulates live updates to dashboard data
+   */
+  function simulateLiveUpdates() {
+    // Update time every minute
+    setInterval(() => {
+      currentDateEl.textContent = getFormattedDate();
+      welcomeMessageEl.textContent = `${getTimeBasedGreeting()}, ${studentData.name.split(' ')[0]}!`;
+    }, 60000);
+    
+    // Simulate new notification every 30 seconds (for demo)
+    setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance
+        const notificationTypes = [
+          { type: "assignment", icon: "fa-file-alt", color: "#6a11cb" },
+          { type: "announcement", icon: "fa-bullhorn", color: "#f39c12" },
+          { type: "reminder", icon: "fa-exclamation-circle", color: "#e74c3c" }
+        ];
+        
+        const randomType = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+        const titles = [
+          "New Material Available",
+          "Class Reminder",
+          "Assignment Deadline Approaching",
+          "System Maintenance Notice"
+        ];
+        
+        const newNotification = {
+          id: Date.now(),
+          type: randomType.type,
+          title: titles[Math.floor(Math.random() * titles.length)],
+          content: "Check your dashboard for more details",
+          time: "Just now",
+          icon: randomType.icon,
+          color: randomType.color
+        };
+        
+        notifications.unshift(newNotification);
+        
+        // Update notification count
+        notificationCount.textContent = notifications.length;
+        
+        // Show toast for new notification
+        if (notificationPanel.style.display !== 'block') {
+          showToast(newNotification.title, newNotification.content, 'info');
+        }
+      }
+    }, 30000);
+  }
+
+  // ====================
+  // INITIALIZATION
+  // ====================
+  
+  /**
+   * Initializes the dashboard
+   */
+  function initDashboard() {
+    // Update student data
+    updateStudentStats();
+    
+    // Populate notifications
+    populateNotifications();
+    
+    // Populate upcoming classes
+    populateUpcomingClasses();
+    
+    // Start live updates simulation
+    simulateLiveUpdates();
+    
+    // Add CSS animation for fadeOut
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(20px); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Show welcome toast
+    setTimeout(() => {
+      showToast('Welcome to Mini LMS Dashboard', 'Your personalized learning dashboard is ready', 'success');
+    }, 1000);
+  }
+
+  // Initialize dashboard when page loads
+  document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>

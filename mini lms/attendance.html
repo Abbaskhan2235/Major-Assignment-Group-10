@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance - Mini LMS</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .top-bar {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 20px 30px;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #6a11cb;
+    display: inline-block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+  }
+
+  th {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr {
+    transition: all 0.3s ease;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+  }
+
+  .percentage-cell {
+    font-weight: 600;
+  }
+
+  .percentage-cell.high {
+    color: #2ecc71;
+  }
+
+  .percentage-cell.medium {
+    color: #f39c12;
+  }
+
+  .percentage-cell.low {
+    color: #e74c3c;
+  }
+
+  .back-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  .back-btn:active {
+    transform: translateY(0);
+  }
+
+  .back-btn::before {
+    content: "←";
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  .attendance-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    border-top: 4px solid #6a11cb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .summary-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-5px);
+  }
+
+  .summary-card h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .summary-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6a11cb;
+  }
+
+  .progress-bar {
+    height: 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    margin-top: 15px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    transition: width 1s ease-in-out;
+  }
+
+  .course-title {
+    font-weight: 600;
+    color: #2c3e50;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .course-title:hover::after {
+    content: 'Click for details';
+    position: absolute;
+    background: #2c3e50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    top: -30px;
+    left: 0;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .course-title:hover::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2c3e50 transparent transparent transparent;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+  }
+
+  .modal-close-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-top: 15px;
+  }
+
+  .modal-close-btn:hover {
+    background: #c0392b;
+  }
+
+  /* Notification Styles */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1001;
+    animation: slideInRight 0.5s ease;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .attendance-summary {
+      flex-direction: column;
+    }
+    
+    .top-bar {
+      font-size: 20px;
+      text-align: center;
+      padding: 15px;
+    }
+    
+    .container {
+      padding: 0 15px;
+    }
+    
+    .modal-content {
+      padding: 20px;
+      width: 95%;
+    }
+  }
+
+  /* Animation for table rows */
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tr {
+    animation: fadeInRow 0.5s ease forwards;
+  }
+
+  tr:nth-child(2) { animation-delay: 0.1s; }
+  tr:nth-child(3) { animation-delay: 0.2s; }
+  tr:nth-child(4) { animation-delay: 0.3s; }
+
+  /* Accessibility */
+  tr:focus {
+    outline: 2px solid #6a11cb;
+    outline-offset: 2px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">Attendance Record</div>
+
+<div class="container">
+  <h2>Course-wise Attendance</h2>
+  
+  <div class="attendance-summary">
+    <div class="summary-card">
+      <h3>Total Courses</h3>
+      <div class="value" id="total-courses">3</div>
+    </div>
+    <div class="summary-card">
+      <h3>Overall Attendance</h3>
+      <div class="value" id="overall-percentage">87.8%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="overall-progress" style="width: 87.8%"></div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <h3>Best Attendance</h3>
+      <div class="value" id="best-percentage">90%</div>
+      <div id="best-course">Programming</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Course</th>
+        <th>Total Classes</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody id="attendance-table-body">
+      <!-- Table rows will be populated by JavaScript -->
+    </tbody>
+  </table>
+
+  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
+
+</div>
+
+<script>
+  // Attendance data
+ // Attendance data
+const attendanceData = [
+    { 
+        id: 1, 
+        course: "Programming", 
+        code: "CS101",
+        instructor: "Dr. Smith",
+        totalClasses: 30, 
+        present: 27, 
+        absent: 3, 
+        percentage: 90,
+        lastUpdated: "2024-03-15",
+        attendanceHistory: [1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1]
+    },
+    { 
+        id: 2, 
+        course: "Data Structures", 
+        code: "CS201",
+        instructor: "Prof. Johnson",
+        totalClasses: 28, 
+        present: 24, 
+        absent: 4, 
+        percentage: 85,
+        lastUpdated: "2024-03-14",
+        attendanceHistory: [1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1]
+    },
+    { 
+        id: 3, 
+        course: "Communication Skills", 
+        code: "CS301",
+        instructor: "Dr. Williams",
+        totalClasses: 25, 
+        present: 22, 
+        absent: 3, 
+        percentage: 88,
+        lastUpdated: "2024-03-13",
+        attendanceHistory: [1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1]
+    },
+    { 
+        id: 4, 
+        course: "Database Systems", 
+        code: "CS401",
+        instructor: "Prof. Brown",
+        totalClasses: 32, 
+        present: 30, 
+        absent: 2, 
+        percentage: 94,
+        lastUpdated: "2024-03-16",
+        attendanceHistory: [1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1]
+    },
+    { 
+        id: 5, 
+        course: "Web Development", 
+        code: "CS501",
+        instructor: "Dr. Davis",
+        totalClasses: 26, 
+        present: 20, 
+        absent: 6, 
+        percentage: 77,
+        lastUpdated: "2024-03-12",
+        attendanceHistory: [1,0,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1]
+    }
+];
+
+// DOM Elements
+const backBtn = document.getElementById('back-to-dashboard');
+const tableBody = document.getElementById('attendance-table-body');
+const totalCoursesEl = document.getElementById('total-courses');
+const overallPercentageEl = document.getElementById('overall-percentage');
+const overallProgressEl = document.getElementById('overall-progress');
+const bestPercentageEl = document.getElementById('best-percentage');
+const bestCourseEl = document.getElementById('best-course');
+
+// Get percentage class based on value
+function getPercentageClass(percentage) {
+    if (percentage >= 90) return 'high';
+    if (percentage >= 80) return 'medium';
+    return 'low';
+}
+
+// Get attendance status text
+function getAttendanceStatus(percentage) {
+    if (percentage >= 90) return 'Excellent';
+    if (percentage >= 85) return 'Very Good';
+    if (percentage >= 80) return 'Good';
+    if (percentage >= 75) return 'Satisfactory';
+    return 'Needs Improvement';
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+// Calculate streak
+function calculateStreak(attendanceHistory) {
+    let currentStreak = 0;
+    let maxStreak = 0;
+    
+    for (let i = attendanceHistory.length - 1; i >= 0; i--) {
+        if (attendanceHistory[i] === 1) {
+            currentStreak++;
+            if (currentStreak > maxStreak) {
+                maxStreak = currentStreak;
+            }
+        } else {
+            currentStreak = 0;
+        }
+    }
+    
+    return { current: currentStreak, max: maxStreak };
+}
+
+// Calculate statistics
+function calculateStatistics() {
+    const totalCourses = attendanceData.length;
+    const totalClasses = attendanceData.reduce((sum, course) => sum + course.totalClasses, 0);
+    const totalPresent = attendanceData.reduce((sum, course) => sum + course.present, 0);
+    const overallPercentage = ((totalPresent / totalClasses) * 100).toFixed(1);
+    
+    let bestAttendance = 0;
+    let bestCourse = '';
+    
+    attendanceData.forEach(course => {
+        if (course.percentage > bestAttendance) {
+            bestAttendance = course.percentage;
+            bestCourse = course.course;
+        }
+    });
+    
+    return {
+        totalCourses,
+        totalClasses,
+        totalPresent,
+        overallPercentage,
+        bestAttendance,
+        bestCourse
+    };
+}
+
+// Update summary cards
+function updateSummaryCards() {
+    const stats = calculateStatistics();
+    
+    totalCoursesEl.textContent = stats.totalCourses;
+    overallPercentageEl.textContent = `${stats.overallPercentage}%`;
+    overallProgressEl.style.width = `${stats.overallPercentage}%`;
+    bestPercentageEl.textContent = `${stats.bestAttendance}%`;
+    bestCourseEl.textContent = stats.bestCourse;
+    
+    // Animate progress bars
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(bar => {
+        const targetWidth = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.transition = 'width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            bar.style.width = targetWidth;
+        }, 100);
+    });
+}
+
+// Create and populate table rows
+function populateTable() {
+    tableBody.innerHTML = '';
+    
+    attendanceData.forEach((course, index) => {
+        const row = document.createElement('tr');
+        const percentageClass = getPercentageClass(course.percentage);
+        const streak = calculateStreak(course.attendanceHistory);
+        
+        row.innerHTML = `
+            <td>
+                <div class="course-title" data-course-id="${course.id}" role="button" tabindex="0" aria-label="View details for ${course.course}">
+                    <div class="course-icon">
+                        <i class="fas fa-${course.id === 1 ? 'code' : course.id === 2 ? 'sitemap' : course.id === 3 ? 'comments' : course.id === 4 ? 'database' : 'laptop'}"></i>
+                    </div>
+                    <div>
+                        <strong>${course.course}</strong>
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">${course.code}</div>
+                    </div>
+                </div>
+            </td>
+            <td>${course.totalClasses}</td>
+            <td>
+                <span style="color: #2ecc71; font-weight: 600;">${course.present}</span>
+                ${streak.current > 3 ? `<span style="display: block; font-size: 0.8rem; color: #f39c12;">🔥 ${streak.current} days streak</span>` : ''}
+            </td>
+            <td>
+                <span style="color: #e74c3c; font-weight: 600;">${course.absent}</span>
+            </td>
+            <td class="percentage-cell ${percentageClass}">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.3rem; font-weight: 700;">${course.percentage}%</span>
+                    <span class="percentage-badge">
+                        ${getAttendanceStatus(course.percentage)}
+                    </span>
+                </div>
+                <div class="progress-indicator">
+                    <div class="progress-indicator-fill" style="width: ${course.percentage}%; background: ${percentageClass === 'high' ? '#2ecc71' : percentageClass === 'medium' ? '#f39c12' : '#e74c3c'}"></div>
+                </div>
+                <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+                    Updated: ${formatDate(course.lastUpdated)}
+                </div>
+            </td>
+        `;
+        
+        // Add event listener to course title
+        const courseTitle = row.querySelector('.course-title');
+        courseTitle.addEventListener('click', () => showCourseModal(course));
+        courseTitle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showCourseModal(course);
+            }
+        });
+        
+        tableBody.appendChild(row);
+    });
+}
+
+// Create attendance history chart
+function createAttendanceChart(course) {
+    const history = course.attendanceHistory;
+    const container = document.createElement('div');
+    container.style.marginTop = '20px';
+    
+    const title = document.createElement('div');
+    title.textContent = 'Recent Attendance Pattern:';
+    title.style.color = '#475569';
+    title.style.marginBottom = '10px';
+    title.style.fontWeight = '600';
+    
+    const chart = document.createElement('div');
+    chart.style.display = 'flex';
+    chart.style.gap = '4px';
+    chart.style.flexWrap = 'wrap';
+    chart.style.marginBottom = '15px';
+    
+    // Show last 20 classes or all if less
+    const showCount = Math.min(20, history.length);
+    const startIndex = history.length - showCount;
+    
+    for (let i = startIndex; i < history.length; i++) {
+        const day = document.createElement('div');
+        day.style.width = '16px';
+        day.style.height = '16px';
+        day.style.borderRadius = '3px';
+        day.style.backgroundColor = history[i] === 1 ? '#2ecc71' : '#e74c3c';
+        day.style.position = 'relative';
+        day.style.cursor = 'pointer';
+        
+        day.title = `Class ${i + 1}: ${history[i] === 1 ? 'Present' : 'Absent'}`;
+        
+        chart.appendChild(day);
+    }
+    
+    const legend = document.createElement('div');
+    legend.style.display = 'flex';
+    legend.style.gap = '15px';
+    legend.style.fontSize = '0.85rem';
+    legend.style.color = '#64748b';
+    
+    legend.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 12px; height: 12px; background-color: #2ecc71; border-radius: 2px;"></div>
+            Present
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 12px; height: 12px; background-color: #e74c3c; border-radius: 2px;"></div>
+            Absent
+        </div>
+    `;
+    
+    container.appendChild(title);
+    container.appendChild(chart);
+    container.appendChild(legend);
+    
+    return container;
+}
+
+// Show course details modal
+function showCourseModal(course) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('course-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+    
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.id = 'course-modal';
+    
+    const percentageClass = getPercentageClass(course.percentage);
+    const percentageColor = course.percentage >= 90 ? '#2ecc71' : 
+                          course.percentage >= 80 ? '#f39c12' : '#e74c3c';
+    const streak = calculateStreak(course.attendanceHistory);
+    
+    modalOverlay.innerHTML = `
+        <div class="modal-content" style="max-width: 700px; width: 95%; max-height: 85vh; overflow-y: auto;">
+            <h3>
+                <i class="fas fa-chart-bar" style="color: ${percentageColor}; margin-right: 0.5rem;"></i>
+                ${course.course} (${course.code}) - Attendance Details
+            </h3>
+            
+            <div style="margin-bottom: 20px; color: #64748b; font-size: 0.95rem;">
+                Instructor: ${course.instructor} | Last Updated: ${formatDate(course.lastUpdated)}
+            </div>
+            
+            <!-- Stats Grid -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Total Classes</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #1a1a2e;">${course.totalClasses}</div>
+                </div>
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Present</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #2ecc71;">${course.present}</div>
+                </div>
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Absent</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: #e74c3c;">${course.absent}</div>
+                </div>
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">Percentage</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: ${percentageColor};">${course.percentage}%</div>
+                </div>
+            </div>
+            
+            <!-- Streak Information -->
+            <div style="display: flex; gap: 1rem; margin: 1.5rem 0;">
+                <div style="flex: 1; background: #fff8e1; padding: 1rem; border-radius: 10px; border-left: 4px solid #f39c12;">
+                    <div style="font-size: 0.9rem; color: #f39c12; margin-bottom: 0.5rem;">Current Streak</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e;">${streak.current} days</div>
+                </div>
+                <div style="flex: 1; background: #e8f5e9; padding: 1rem; border-radius: 10px; border-left: 4px solid #2ecc71;">
+                    <div style="font-size: 0.9rem; color: #2ecc71; margin-bottom: 0.5rem;">Best Streak</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e;">${streak.max} days</div>
+                </div>
+            </div>
+            
+            <!-- Attendance Chart -->
+            <div id="attendance-chart-container" style="margin: 1.5rem 0;"></div>
+            
+            <!-- Attendance Progress -->
+            <div style="margin: 1.5rem 0;">
+                <h4 style="color: #475569; margin-bottom: 15px; font-size: 1.1rem;">Attendance Progress</h4>
+                <div class="progress-bar" style="height: 16px; margin-bottom: 10px; background: #e2e8f0;">
+                    <div class="progress-fill" style="width: ${course.percentage}%; background: linear-gradient(90deg, ${percentageColor} 0%, ${percentageColor}99 100%);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8;">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span style="color: #e74c3c;">75% (Min)</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            
+            <!-- Remarks -->
+            <div style="margin: 1.5rem 0;">
+                <h4 style="color: #475569; margin-bottom: 15px; font-size: 1.1rem;">Remarks</h4>
+                <div style="padding: 1.2rem; background: ${percentageClass === 'high' ? '#d5f4e630' : percentageClass === 'medium' ? '#f9e79f30' : '#fadbd830'}; 
+                   border-radius: 12px; border-left: 4px solid ${percentageClass === 'high' ? '#2ecc71' : percentageClass === 'medium' ? '#f39c12' : '#e74c3c'};">
+                    <p style="color: #475569; margin-bottom: 0.5rem; font-weight: 600;">
+                        ${getAttendanceStatus(course.percentage)}
+                    </p>
+                    <p style="color: #64748b; font-size: 0.95rem;">
+                        ${course.percentage >= 90 ? 'You have maintained outstanding attendance. Keep up the excellent work!' : 
+                          course.percentage >= 85 ? 'Very good attendance record. You are consistently attending classes.' : 
+                          course.percentage >= 80 ? 'Good attendance. Continue with this pattern to maintain your performance.' : 
+                          course.percentage >= 75 ? 'You are meeting the minimum requirement. Try to improve your attendance for better academic performance.' : 
+                          'Your attendance is below the required threshold. Please attend more classes regularly to avoid academic penalties.'}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button class="modal-close-btn" id="close-modal">
+                <i class="fas fa-times"></i> Close Details
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modalOverlay);
+    
+    // Add attendance chart
+    const chartContainer = modalOverlay.querySelector('#attendance-chart-container');
+    chartContainer.appendChild(createAttendanceChart(course));
+    
+    // Add event listeners for closing modal
+    const closeModal = () => {
+        modalOverlay.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            modalOverlay.remove();
+            document.body.style.overflow = 'auto';
+        }, 300);
+    };
+    
+    // Close button
+    const closeBtn = modalOverlay.querySelector('#close-modal');
+    closeBtn.addEventListener('click', closeModal);
+    
+    // Close on overlay click
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+    
+    // Close with Escape key
+    const closeOnEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', closeOnEscape);
+        }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+}
+
+// Show notification
+function showNotification(message, type = 'success', duration = 3000) {
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+        notification.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => notification.remove(), 500);
+    });
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => notification.remove(), 500);
+    }, duration);
+}
+
+// Initialize the page
+function init() {
+    // Populate table and update summary
+    populateTable();
+    updateSummaryCards();
+    
+    // Back button functionality
+    backBtn.addEventListener('click', function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        this.disabled = true;
+        
+        showNotification('Returning to Dashboard...', 'info');
+        
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+            showNotification('Dashboard navigation simulated. In a real app, this would redirect.', 'info');
+        }, 1500);
+    });
+    
+    // Add export button
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'back-btn';
+    exportBtn.style.marginRight = '15px';
+    exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Export Report';
+    exportBtn.addEventListener('click', () => {
+        showNotification('Export feature would generate CSV report in real application.', 'info');
+    });
+    backBtn.parentNode.insertBefore(exportBtn, backBtn);
+    
+    // Show welcome message
+    setTimeout(() => {
+        const stats = calculateStatistics();
+        showNotification(`Welcome! Your overall attendance is ${stats.overallPercentage}%. Click on any course for details.`, 'success', 4000);
+    }, 1000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+    }
+    
+    .modal-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .modal-content::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

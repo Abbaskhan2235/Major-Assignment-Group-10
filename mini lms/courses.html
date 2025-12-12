@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses - Mini LMS</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .top-bar {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 20px 30px;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #6a11cb;
+    display: inline-block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+  }
+
+  th {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr {
+    transition: all 0.3s ease;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+  }
+
+  .back-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(106, 17, 203, 0.3);
+  }
+
+  .back-btn:active {
+    transform: translateY(0);
+  }
+
+  .back-btn::before {
+    content: "←";
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  .course-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 14px;
+  }
+
+  .view-btn {
+    background: #3498db;
+    color: white;
+  }
+
+  .view-btn:hover {
+    background: #2980b9;
+  }
+
+  .materials-btn {
+    background: #2ecc71;
+    color: white;
+  }
+
+  .materials-btn:hover {
+    background: #27ae60;
+  }
+
+  .drop-btn {
+    background: #e74c3c;
+    color: white;
+  }
+
+  .drop-btn:hover {
+    background: #c0392b;
+  }
+
+  .course-card {
+    display: none;
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #6a11cb;
+  }
+
+  .filter-container {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 10px 20px;
+    background: white;
+    border: 2px solid #6a11cb;
+    border-radius: 25px;
+    color: #6a11cb;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .filter-btn.active {
+    background: #6a11cb;
+    color: white;
+  }
+
+  .filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(106, 17, 203, 0.2);
+  }
+
+  .search-box {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    min-width: 250px;
+  }
+
+  .search-box:focus {
+    outline: none;
+    border-color: #6a11cb;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+  }
+
+  .modal-close-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+    margin-top: 15px;
+  }
+
+  .modal-close-btn:hover {
+    background: #c0392b;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    table {
+      display: block;
+      overflow-x: auto;
+    }
+    
+    .top-bar {
+      font-size: 20px;
+      text-align: center;
+      padding: 15px;
+    }
+    
+    .container {
+      padding: 0 15px;
+    }
+    
+    .course-actions {
+      flex-direction: column;
+    }
+    
+    .filter-container {
+      flex-direction: column;
+    }
+    
+    .search-box {
+      min-width: 100%;
+    }
+  }
+
+  /* Animation for table rows */
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tr {
+    animation: fadeInRow 0.5s ease forwards;
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1001;
+    animation: slideInRight 0.5s ease;
+  }
+
+  .notification.error {
+    background: #e74c3c;
+  }
+
+  .notification.warning {
+    background: #f39c12;
+  }
+
+  .notification.info {
+    background: #3498db;
+  }
+
+  .stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+    border-top: 4px solid #6a11cb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6a11cb;
+  }
+
+  .stat-card .label {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">My Courses</div>
+
+<div class="container">
+  <h2>Enrolled Courses</h2>
+
+  <!-- Statistics -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="value" id="total-courses">3</div>
+      <div class="label">Total Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="cs-courses">2</div>
+      <div class="label">CS Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="other-courses">1</div>
+      <div class="label">Other Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="credits-hours">9</div>
+      <div class="label">Credit Hours</div>
+    </div>
+  </div>
+
+  <!-- Filter and Search -->
+  <div class="filter-container">
+    <input type="text" class="search-box" id="search-courses" placeholder="Search courses by name or code...">
+    <button class="filter-btn active" data-filter="all">All Courses</button>
+    <button class="filter-btn" data-filter="cs">CS Courses</button>
+    <button class="filter-btn" data-filter="eng">ENG Courses</button>
+    <button class="filter-btn" data-filter="active">Active</button>
+  </div>
+
+  <!-- Course Cards View (Hidden by default) -->
+  <div id="course-cards-view"></div>
+
+  <!-- Table View -->
+  <table id="courses-table">
+    <thead>
+      <tr>
+        <th>Course Code</th>
+        <th>Course Title</th>
+        <th>Teacher</th>
+        <th>Schedule</th>
+        <th>Credits</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="courses-table-body">
+      <!-- Table rows will be populated by JavaScript -->
+    </tbody>
+  </table>
+
+  <div style="text-align: center; margin: 20px 0;">
+    <button id="toggle-view" class="action-btn" style="background: #9b59b6; color: white; padding: 10px 20px;">
+      Switch to Card View
+    </button>
+  </div>
+
+  <button class="back-btn" id="back-to-dashboard">Back to Dashboard</button>
+
+</div>
+
+<script>
+  // Course data
+  // Course data with more detailed information
+const coursesData = [
+    { 
+        id: 1,
+        code: "CS101", 
+        title: "Introduction to Programming", 
+        teacher: "Sir Ahmed",
+        teacherEmail: "ahmed.cs@university.edu",
+        schedule: "Mon/Wed 9:00-10:30",
+        credits: 3,
+        department: "cs",
+        status: "active",
+        description: "Learn the fundamentals of programming using Python. This course covers variables, loops, functions, and basic algorithms.",
+        materials: [
+            { name: "Syllabus.pdf", type: "pdf", size: "2.1 MB", uploaded: "2024-01-15" },
+            { name: "Lecture1.pptx", type: "ppt", size: "4.3 MB", uploaded: "2024-01-22" },
+            { name: "Assignment1.pdf", type: "pdf", size: "1.5 MB", uploaded: "2024-01-28" }
+        ],
+        grade: "A-",
+        progress: 85,
+        room: "Room 302",
+        startDate: "2024-01-15",
+        endDate: "2024-05-15",
+        enrolledStudents: 45,
+        announcements: [
+            "Assignment 2 deadline extended to Friday",
+            "Midterm exam scheduled for March 20th"
+        ]
+    },
+    { 
+        id: 2,
+        code: "CS102", 
+        title: "Data Structures", 
+        teacher: "Sir Bilal",
+        teacherEmail: "bilal.ds@university.edu",
+        schedule: "Tue/Thu 11:00-12:30",
+        credits: 3,
+        department: "cs",
+        status: "active",
+        description: "Study of fundamental data structures including arrays, linked lists, stacks, queues, and trees.",
+        materials: [
+            { name: "Syllabus.pdf", type: "pdf", size: "1.8 MB", uploaded: "2024-01-16" },
+            { name: "DS_Notes.pdf", type: "pdf", size: "3.2 MB", uploaded: "2024-01-23" },
+            { name: "Lab1.pdf", type: "pdf", size: "0.9 MB", uploaded: "2024-01-30" }
+        ],
+        grade: "B+",
+        progress: 78,
+        room: "Lab 105",
+        startDate: "2024-01-16",
+        endDate: "2024-05-16",
+        enrolledStudents: 38,
+        announcements: [
+            "Lab 2 submission due next Monday",
+            "Extra office hours this Thursday"
+        ]
+    },
+    { 
+        id: 3,
+        code: "ENG101", 
+        title: "Communication Skills", 
+        teacher: "Ma'am Sana",
+        teacherEmail: "sana.eng@university.edu",
+        schedule: "Mon/Wed 2:00-3:30",
+        credits: 3,
+        department: "eng",
+        status: "active",
+        description: "Develop effective written and oral communication skills for academic and professional contexts.",
+        materials: [
+            { name: "Syllabus.pdf", type: "pdf", size: "1.5 MB", uploaded: "2024-01-17" },
+            { name: "WritingGuide.pdf", type: "pdf", size: "2.8 MB", uploaded: "2024-01-24" },
+            { name: "PresentationTips.pdf", type: "pdf", size: "1.2 MB", uploaded: "2024-01-31" }
+        ],
+        grade: "A",
+        progress: 92,
+        room: "Room 201",
+        startDate: "2024-01-17",
+        endDate: "2024-05-17",
+        enrolledStudents: 52,
+        announcements: [
+            "Group presentations start next week",
+            "Writing workshop this Friday"
+        ]
+    },
+    { 
+        id: 4,
+        code: "MATH201", 
+        title: "Calculus II", 
+        teacher: "Dr. Khan",
+        teacherEmail: "khan.math@university.edu",
+        schedule: "Tue/Thu 8:00-9:30",
+        credits: 4,
+        department: "math",
+        status: "completed",
+        description: "Advanced topics in calculus including integration techniques and series.",
+        materials: [
+            { name: "Syllabus.pdf", type: "pdf", size: "1.9 MB", uploaded: "2023-09-05" },
+            { name: "FormulaSheet.pdf", type: "pdf", size: "0.8 MB", uploaded: "2023-09-12" }
+        ],
+        grade: "B",
+        progress: 100,
+        room: "Room 401",
+        startDate: "2023-09-05",
+        endDate: "2023-12-15",
+        enrolledStudents: 60,
+        announcements: []
+    },
+    { 
+        id: 5,
+        code: "CS201", 
+        title: "Object-Oriented Programming", 
+        teacher: "Dr. Ali",
+        teacherEmail: "ali.oop@university.edu",
+        schedule: "Mon/Wed/Fri 10:00-11:00",
+        credits: 3,
+        department: "cs",
+        status: "active",
+        description: "Learn object-oriented programming concepts using Java.",
+        materials: [
+            { name: "Syllabus.pdf", type: "pdf", size: "2.0 MB", uploaded: "2024-01-18" },
+            { name: "OOP_Notes.pdf", type: "pdf", size: "3.5 MB", uploaded: "2024-01-25" }
+        ],
+        grade: "In Progress",
+        progress: 45,
+        room: "Lab 208",
+        startDate: "2024-01-18",
+        endDate: "2024-05-18",
+        enrolledStudents: 42,
+        announcements: [
+            "Project proposal due next week",
+            "Java installation guide posted"
+        ]
+    }
+];
+
+// DOM Elements
+const tableBody = document.getElementById('courses-table-body');
+const courseCardsView = document.getElementById('course-cards-view');
+const backBtn = document.getElementById('back-to-dashboard');
+const toggleViewBtn = document.getElementById('toggle-view');
+const searchBox = document.getElementById('search-courses');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const statsContainer = document.querySelector('.stats-container');
+
+// Statistics elements
+const totalCoursesEl = document.getElementById('total-courses');
+const csCoursesEl = document.getElementById('cs-courses');
+const otherCoursesEl = document.getElementById('other-courses');
+const creditsHoursEl = document.getElementById('credits-hours');
+
+// State management
+let currentView = 'table';
+let currentFilter = 'all';
+let currentSearch = '';
+let sortConfig = { key: 'code', direction: 'asc' };
+let favoriteCourses = JSON.parse(localStorage.getItem('favoriteCourses')) || [];
+
+// Utility functions
+const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+};
+
+const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    const icons = {
+        pdf: 'fa-file-pdf',
+        ppt: 'fa-file-powerpoint',
+        pptx: 'fa-file-powerpoint',
+        doc: 'fa-file-word',
+        docx: 'fa-file-word',
+        xls: 'fa-file-excel',
+        xlsx: 'fa-file-excel',
+        txt: 'fa-file-alt',
+        zip: 'fa-file-archive',
+        jpg: 'fa-file-image',
+        jpeg: 'fa-file-image',
+        png: 'fa-file-image',
+        mp4: 'fa-file-video'
+    };
+    return icons[extension] || 'fa-file';
+};
+
+const getDepartmentColor = (dept) => {
+    const colors = {
+        cs: '#6a11cb',
+        eng: '#e74c3c',
+        math: '#f39c12',
+        sci: '#2ecc71',
+        art: '#9b59b6',
+        bus: '#3498db'
+    };
+    return colors[dept] || '#95a5a6';
+};
+
+const getProgressColor = (progress) => {
+    if (progress >= 90) return '#2ecc71';
+    if (progress >= 70) return '#f39c12';
+    return '#e74c3c';
+};
+
+// Update statistics with animation
+function updateStatistics() {
+    const totalCourses = coursesData.length;
+    const csCourses = coursesData.filter(course => course.department === 'cs').length;
+    const otherCourses = totalCourses - csCourses;
+    const totalCredits = coursesData.reduce((sum, course) => sum + course.credits, 0);
+    const activeCourses = coursesData.filter(course => course.status === 'active').length;
+    
+    // Animate counting
+    const animateCounter = (element, target) => {
+        const duration = 1000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current);
+        }, 16);
+    };
+    
+    animateCounter(totalCoursesEl, totalCourses);
+    animateCounter(csCoursesEl, csCourses);
+    animateCounter(otherCoursesEl, otherCourses);
+    animateCounter(creditsHoursEl, totalCredits);
+    
+    // Add active courses stat if not exists
+    if (!document.getElementById('active-courses')) {
+        const activeStat = document.createElement('div');
+        activeStat.className = 'stat-card';
+        activeStat.id = 'active-courses-stat';
+        activeStat.innerHTML = `
+            <div class="value" id="active-courses">${activeCourses}</div>
+            <div class="label">Active Courses</div>
+        `;
+        statsContainer.appendChild(activeStat);
+    } else {
+        animateCounter(document.getElementById('active-courses'), activeCourses);
+    }
+}
+
+// Get filtered and sorted courses
+function getFilteredCourses() {
+    let filtered = [...coursesData];
+    
+    // Apply search filter
+    if (currentSearch) {
+        const searchLower = currentSearch.toLowerCase();
+        filtered = filtered.filter(course => 
+            course.code.toLowerCase().includes(searchLower) ||
+            course.title.toLowerCase().includes(searchLower) ||
+            course.teacher.toLowerCase().includes(searchLower) ||
+            course.description.toLowerCase().includes(searchLower)
+        );
+    }
+    
+    // Apply category filter
+    if (currentFilter !== 'all') {
+        if (currentFilter === 'cs') {
+            filtered = filtered.filter(course => course.department === 'cs');
+        } else if (currentFilter === 'eng') {
+            filtered = filtered.filter(course => course.department === 'eng');
+        } else if (currentFilter === 'active') {
+            filtered = filtered.filter(course => course.status === 'active');
+        } else if (currentFilter === 'favorites') {
+            filtered = filtered.filter(course => favoriteCourses.includes(course.id));
+        }
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+        
+        if (sortConfig.key === 'progress') {
+            aValue = a.status === 'completed' ? 100 : a.progress;
+            bValue = b.status === 'completed' ? 100 : b.progress;
+        }
+        
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    return filtered;
+}
+
+// Create table header with sort functionality
+function createTableHeader() {
+    const thead = document.querySelector('#courses-table thead tr');
+    thead.innerHTML = `
+        <th data-sort="code">Course Code <i class="fas fa-sort"></i></th>
+        <th data-sort="title">Course Title <i class="fas fa-sort"></i></th>
+        <th data-sort="teacher">Teacher <i class="fas fa-sort"></i></th>
+        <th data-sort="schedule">Schedule <i class="fas fa-sort"></i></th>
+        <th data-sort="credits">Credits <i class="fas fa-sort"></i></th>
+        <th>Actions</th>
+    `;
+    
+    // Add sort event listeners
+    thead.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.getAttribute('data-sort');
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            
+            // Update sort indicators
+            thead.querySelectorAll('th i').forEach(icon => {
+                icon.className = 'fas fa-sort';
+            });
+            
+            const icon = th.querySelector('i');
+            icon.className = `fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'}`;
+            
+            currentView === 'table' ? populateTableView() : populateCardView();
+        });
+    });
+}
+
+// Enhanced table view
+function populateTableView() {
+    const filteredCourses = getFilteredCourses();
+    tableBody.innerHTML = '';
+    
+    if (filteredCourses.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="6" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+                No courses found matching your criteria.
+                ${currentFilter === 'favorites' ? '<br><small>Add courses to favorites by clicking the star icon</small>' : ''}
+            </td>
+        `;
+        tableBody.appendChild(row);
+        return;
+    }
+    
+    filteredCourses.forEach((course, index) => {
+        const row = document.createElement('tr');
+        row.style.animationDelay = `${index * 0.05}s`;
+        
+        const isFavorite = favoriteCourses.includes(course.id);
+        const statusColor = course.status === 'active' ? '#2ecc71' : '#95a5a6';
+        const deptColor = getDepartmentColor(course.department);
+        
+        row.innerHTML = `
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="favorite-btn" data-course-id="${course.id}" 
+                            style="background: none; border: none; cursor: pointer; font-size: 18px; color: ${isFavorite ? '#f1c40f' : '#ddd'};">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    <div>
+                        <strong style="color: ${deptColor};">${course.code}</strong>
+                        <div style="font-size: 12px; color: ${statusColor};">
+                            ${course.status} • ${course.room}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div style="font-weight: 600; margin-bottom: 5px;">${course.title}</div>
+                <div style="font-size: 14px; color: #7f8c8d; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-chart-line" style="color: ${getProgressColor(course.status === 'completed' ? 100 : course.progress)};"></i>
+                    ${course.status === 'completed' ? 'Completed' : `Progress: ${course.progress}%`}
+                </div>
+            </td>
+            <td>
+                <div>${course.teacher}</div>
+                <div style="font-size: 12px; color: #7f8c8d;">${course.teacherEmail}</div>
+            </td>
+            <td>
+                <div>${course.schedule}</div>
+                <div style="font-size: 12px; color: #7f8c8d;">
+                    ${formatDate(course.startDate)} - ${formatDate(course.endDate)}
+                </div>
+            </td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="font-weight: 600; color: #6a11cb; font-size: 18px;">${course.credits}</div>
+                    <div style="font-size: 14px; color: #7f8c8d;">
+                        ${course.enrolledStudents} students
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="course-actions">
+                    <button class="action-btn view-btn" data-course-id="${course.id}" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn materials-btn" data-course-id="${course.id}" title="Course Materials">
+                        <i class="fas fa-folder"></i>
+                    </button>
+                    ${course.status === 'active' ? `
+                        <button class="action-btn schedule-btn" data-course-id="${course.id}" title="Add to Calendar">
+                            <i class="fas fa-calendar-plus"></i>
+                        </button>
+                        <button class="action-btn drop-btn" data-course-id="${course.id}" title="Drop Course">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    attachTableEventListeners();
+}
+
+// Enhanced card view
+function populateCardView() {
+    const filteredCourses = getFilteredCourses();
+    courseCardsView.innerHTML = '';
+    
+    if (filteredCourses.length === 0) {
+        courseCardsView.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: #7f8c8d; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+                <i class="fas fa-search" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h3 style="margin-bottom: 10px;">No courses found</h3>
+                <p>Try changing your search or filter criteria</p>
+            </div>
+        `;
+        return;
+    }
+    
+    filteredCourses.forEach((course, index) => {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.style.display = 'block';
+        
+        const isFavorite = favoriteCourses.includes(course.id);
+        const deptColor = getDepartmentColor(course.department);
+        const progressColor = getProgressColor(course.status === 'completed' ? 100 : course.progress);
+        
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                        <button class="favorite-btn" data-course-id="${course.id}" 
+                                style="background: none; border: none; cursor: pointer; font-size: 18px; color: ${isFavorite ? '#f1c40f' : '#ddd'};">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <h3 style="color: ${deptColor}; margin: 0;">${course.code}: ${course.title}</h3>
+                    </div>
+                    <div style="color: #7f8c8d; margin-bottom: 10px;">${course.teacher}</div>
+                </div>
+                <div style="background: ${course.status === 'active' ? '#2ecc71' : '#95a5a6'}; 
+                     color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;">
+                    ${course.status}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px; color: #555; line-height: 1.6;">
+                ${course.description}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">Schedule</div>
+                    <div style="font-weight: 600;">${course.schedule}</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">Credits</div>
+                    <div style="font-weight: 600; color: #6a11cb;">${course.credits}</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">Progress</div>
+                    <div style="font-weight: 600; color: ${progressColor};">${course.status === 'completed' ? '100%' : `${course.progress}%`}</div>
+                </div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">Grade</div>
+                    <div style="font-weight: 600;">${course.grade}</div>
+                </div>
+            </div>
+            
+            <div class="course-actions">
+                <button class="action-btn view-btn" data-course-id="${course.id}">
+                    <i class="fas fa-eye"></i> Details
+                </button>
+                <button class="action-btn materials-btn" data-course-id="${course.id}">
+                    <i class="fas fa-folder"></i> Materials
+                </button>
+                ${course.status === 'active' ? `
+                    <button class="action-btn schedule-btn" data-course-id="${course.id}">
+                        <i class="fas fa-calendar-plus"></i> Calendar
+                    </button>
+                    <button class="action-btn drop-btn" data-course-id="${course.id}">
+                        <i class="fas fa-times"></i> Drop
+                    </button>
+                ` : ''}
+            </div>
+        `;
+        
+        courseCardsView.appendChild(card);
+    });
+    
+    attachCardEventListeners();
+}
+
+// Attach event listeners to table elements
+function attachTableEventListeners() {
+    // Row click for details
+    document.querySelectorAll('#courses-table-body tr').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (!e.target.closest('.course-actions') && !e.target.closest('.favorite-btn')) {
+                const courseCode = this.querySelector('td:first-child strong').textContent;
+                const course = coursesData.find(c => c.code === courseCode);
+                if (course) showCourseDetails(course);
+            }
+        });
+        row.style.cursor = 'pointer';
+    });
+    
+    // Action buttons
+    attachActionButtons();
+    
+    // Favorite buttons
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const courseId = parseInt(this.getAttribute('data-course-id'));
+            toggleFavorite(courseId);
+        });
+    });
+}
+
+// Attach event listeners to card elements
+function attachCardEventListeners() {
+    // Action buttons
+    attachActionButtons();
+    
+    // Favorite buttons
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const courseId = parseInt(this.getAttribute('data-course-id'));
+            toggleFavorite(courseId);
+        });
+    });
+}
+
+// Attach action buttons
+function attachActionButtons() {
+    // View buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const courseId = parseInt(btn.getAttribute('data-course-id'));
+            const course = coursesData.find(c => c.id === courseId);
+            showCourseDetails(course);
+        });
+    });
+    
+    // Materials buttons
+    document.querySelectorAll('.materials-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const courseId = parseInt(btn.getAttribute('data-course-id'));
+            const course = coursesData.find(c => c.id === courseId);
+            showCourseMaterials(course);
+        });
+    });
+    
+    // Schedule buttons
+    document.querySelectorAll('.schedule-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const courseId = parseInt(btn.getAttribute('data-course-id'));
+            const course = coursesData.find(c => c.id === courseId);
+            addToCalendar(course);
+        });
+    });
+    
+    // Drop buttons
+    document.querySelectorAll('.drop-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const courseId = parseInt(btn.getAttribute('data-course-id'));
+            const course = coursesData.find(c => c.id === courseId);
+            showDropConfirmation(course);
+        });
+    });
+}
+
+// Toggle favorite status
+function toggleFavorite(courseId) {
+    const index = favoriteCourses.indexOf(courseId);
+    if (index === -1) {
+        favoriteCourses.push(courseId);
+        showNotification('Course added to favorites!', 'success');
+    } else {
+        favoriteCourses.splice(index, 1);
+        showNotification('Course removed from favorites', 'info');
+    }
+    
+    localStorage.setItem('favoriteCourses', JSON.stringify(favoriteCourses));
+    currentView === 'table' ? populateTableView() : populateCardView();
+}
+
+// Enhanced course details modal
+function showCourseDetails(course) {
+    const modalHTML = `
+        <div class="modal-overlay" id="course-modal">
+            <div class="modal-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50; margin: 0; border-bottom: 2px solid ${getDepartmentColor(course.department)}; padding-bottom: 10px;">
+                        ${course.code}: ${course.title}
+                    </h3>
+                    <button id="close-modal-top" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">×</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div>
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">Course Information</h4>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                            <p><strong>Instructor:</strong> ${course.teacher}</p>
+                            <p><strong>Email:</strong> ${course.teacherEmail}</p>
+                            <p><strong>Schedule:</strong> ${course.schedule}</p>
+                            <p><strong>Room:</strong> ${course.room}</p>
+                            <p><strong>Credit Hours:</strong> ${course.credits}</p>
+                            <p><strong>Department:</strong> ${course.department.toUpperCase()}</p>
+                            <p><strong>Status:</strong> <span style="color: ${course.status === 'active' ? '#2ecc71' : '#95a5a6'}">${course.status}</span></p>
+                            <p><strong>Current Grade:</strong> <span style="font-weight: bold; color: #6a11cb;">${course.grade}</span></p>
+                        </div>
+                        
+                        <h4 style="color: #2c3e50; margin: 20px 0 15px;">Course Description</h4>
+                        <p style="line-height: 1.6; background: #f8f9fa; padding: 15px; border-radius: 8px;">${course.description}</p>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">Progress & Stats</h4>
+                        <div style="text-align: center; background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 10px;">
+                            <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 10px;">Course Progress</div>
+                            <div style="position: relative; width: 120px; height: 120px; margin: 0 auto 20px;">
+                                <svg width="120" height="120" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="12"/>
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="${getProgressColor(course.status === 'completed' ? 100 : course.progress)}" 
+                                            stroke-width="12" stroke-linecap="round" 
+                                            stroke-dasharray="${course.status === 'completed' ? 339 : (339 * course.progress / 100)} 339"
+                                            transform="rotate(-90 60 60)"/>
+                                </svg>
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; color: #2c3e50;">
+                                    ${course.status === 'completed' ? '100%' : `${course.progress}%`}
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: #7f8c8d;">
+                                ${course.enrolledStudents} students enrolled
+                            </div>
+                        </div>
+                        
+                        ${course.announcements.length > 0 ? `
+                            <h4 style="color: #2c3e50; margin: 20px 0 15px;">Recent Announcements</h4>
+                            <div style="background: #fff8e1; border-left: 4px solid #f39c12; padding: 15px; border-radius: 8px;">
+                                ${course.announcements.map(ann => `<p style="margin-bottom: 10px;">• ${ann}</p>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">Course Timeline</h4>
+                    <div style="display: flex; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                        <div style="flex: 1; text-align: center;">
+                            <div style="font-size: 12px; color: #7f8c8d;">Start Date</div>
+                            <div style="font-weight: 600;">${formatDate(course.startDate)}</div>
+                        </div>
+                        <div style="flex: 2; position: relative; height: 4px; background: #ddd; margin: 0 20px;">
+                            <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${course.status === 'completed' ? 100 : course.progress}%; 
+                                 background: ${getProgressColor(course.status === 'completed' ? 100 : course.progress)}; border-radius: 2px;"></div>
+                        </div>
+                        <div style="flex: 1; text-align: center;">
+                            <div style="font-size: 12px; color: #7f8c8d;">End Date</div>
+                            <div style="font-weight: 600;">${formatDate(course.endDate)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px;">
+                    <button id="email-instructor" class="action-btn view-btn" style="padding: 10px 20px;">
+                        <i class="fas fa-envelope"></i> Email Instructor
+                    </button>
+                    <button id="close-modal" class="modal-close-btn">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Email instructor button
+    document.getElementById('email-instructor').addEventListener('click', () => {
+        window.open(`mailto:${course.teacherEmail}?subject=Question about ${course.code}`);
+    });
+    
+    setupModalEvents();
+}
+
+// Enhanced course materials modal
+function showCourseMaterials(course) {
+    const totalSize = course.materials.reduce((sum, mat) => {
+        const size = parseFloat(mat.size);
+        return sum + (isNaN(size) ? 0 : size);
+    }, 0);
+    
+    const modalHTML = `
+        <div class="modal-overlay" id="materials-modal">
+            <div class="modal-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50; margin: 0; border-bottom: 2px solid ${getDepartmentColor(course.department)}; padding-bottom: 10px;">
+                        <i class="fas fa-folder-open"></i> Course Materials: ${course.code}
+                    </h3>
+                    <button id="close-modal-top" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">×</button>
+                </div>
+                
+                <div style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="margin: 0;"><strong>Course:</strong> ${course.title}</p>
+                        <p style="margin: 0;"><strong>Instructor:</strong> ${course.teacher}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 12px; color: #7f8c8d;">Total Files</div>
+                        <div style="font-size: 18px; font-weight: bold;">${course.materials.length}</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">Available Materials (${totalSize.toFixed(1)} MB)</h4>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${course.materials.map((material, index) => `
+                            <div class="material-item" data-material-index="${index}" 
+                                 style="display: flex; justify-content: space-between; align-items: center; 
+                                        padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;
+                                        transition: background 0.3s;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="width: 40px; height: 40px; background: ${getDepartmentColor(course.department)}20; 
+                                         border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${getDepartmentColor(course.department)};">
+                                        <i class="fas ${getFileIcon(material.name)}"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600;">${material.name}</div>
+                                        <div style="font-size: 12px; color: #7f8c8d;">
+                                            ${material.size} • Uploaded: ${formatDate(material.uploaded)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="action-btn view-btn download-btn" data-material="${material.name}" 
+                                        style="font-size: 12px; padding: 8px 15px;">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #e8f4fc; border-radius: 8px; border-left: 4px solid #3498db;">
+                    <strong><i class="fas fa-info-circle"></i> Note:</strong> All materials are for educational purposes only. 
+                    Please respect copyright laws. Downloaded materials will be saved to your device.
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <button id="download-all" class="action-btn materials-btn" style="padding: 10px 20px;">
+                        <i class="fas fa-download"></i> Download All
+                    </button>
+                    <button id="close-modal" class="modal-close-btn">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Material item click
+    document.querySelectorAll('.material-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (!e.target.closest('.download-btn')) {
+                const index = this.getAttribute('data-material-index');
+                const material = course.materials[index];
+                showMaterialPreview(material, course);
+            }
+        });
+    });
+    
+    // Download all button
+    document.getElementById('download-all').addEventListener('click', () => {
+        showNotification(`Downloading all materials for ${course.code} (${totalSize.toFixed(1)} MB)...`, 'info');
+        course.materials.forEach(material => {
+            setTimeout(() => {
+                showNotification(`Downloaded: ${material.name}`, 'success');
+            }, Math.random() * 1000);
+        });
+    });
+    
+    setupModalEvents();
+}
+
+// Add to calendar function
+function addToCalendar(course) {
+    // Parse schedule to create calendar event
+    const schedule = parseSchedule(course.schedule);
+    
+    const modalHTML = `
+        <div class="modal-overlay" id="calendar-modal">
+            <div class="modal-content">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #6a11cb; padding-bottom: 10px;">
+                    <i class="fas fa-calendar-plus"></i> Add to Calendar
+                </h3>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 72px; color: #3498db; margin-bottom: 20px;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <p style="font-size: 18px; margin-bottom: 10px;">
+                        Add <strong>${course.code}: ${course.title}</strong> to your calendar?
+                    </p>
+                    <p style="color: #7f8c8d;">
+                        This will add recurring events for the entire semester.
+                    </p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">Event Details</h4>
+                    <p><strong>Schedule:</strong> ${course.schedule}</p>
+                    <p><strong>Location:</strong> ${course.room}</p>
+                    <p><strong>Duration:</strong> ${course.startDate} to ${course.endDate}</p>
+                    <p><strong>Instructor:</strong> ${course.teacher}</p>
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button id="export-ical" class="action-btn materials-btn" style="padding: 12px 24px;">
+                        <i class="fas fa-file-export"></i> Export iCal
+                    </button>
+                    <button id="add-google" class="action-btn view-btn" style="padding: 12px 24px;">
+                        <i class="fab fa-google"></i> Google Calendar
+                    </button>
+                    <button id="cancel-calendar" class="modal-close-btn" style="padding: 12px 24px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    document.getElementById('export-ical').addEventListener('click', () => {
+        showNotification('iCal file generated. Download will start shortly.', 'success');
+        setTimeout(() => {
+            document.querySelector('.modal-overlay').remove();
+        }, 1000);
+    });
+    
+    document.getElementById('add-google').addEventListener('click', () => {
+        showNotification('Opening Google Calendar...', 'info');
+        // In real app: window.open(googleCalendarURL)
+        setTimeout(() => {
+            document.querySelector('.modal-overlay').remove();
+        }, 1000);
+    });
+    
+    document.getElementById('cancel-calendar').addEventListener('click', () => {
+        document.querySelector('.modal-overlay').remove();
+    });
+    
+    const modal = document.querySelector('.modal-overlay');
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Parse schedule string
+function parseSchedule(schedule) {
+    // This is a simplified parser - in production, you'd want a more robust solution
+    const parts = schedule.split(' ');
+    const days = parts[0].split('/');
+    const time = parts[1];
+    
+    return {
+        days: days,
+        time: time,
+        startTime: time.split('-')[0],
+        endTime: time.split('-')[1]
+    };
+}
+
+// Material preview modal
+function showMaterialPreview(material, course) {
+    const modalHTML = `
+        <div class="modal-overlay" id="preview-modal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50; margin: 0;">
+                        <i class="fas ${getFileIcon(material.name)}"></i> ${material.name}
+                    </h3>
+                    <button id="close-preview" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">×</button>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div>
+                            <div><strong>Course:</strong> ${course.code} - ${course.title}</div>
+                            <div><strong>Uploaded:</strong> ${formatDate(material.uploaded)}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div><strong>Size:</strong> ${material.size}</div>
+                            <div><strong>Type:</strong> ${material.type.toUpperCase()}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; padding: 40px; background: #f0f0f0; border-radius: 10px; margin-bottom: 20px;">
+                    <i class="fas ${getFileIcon(material.name)}" style="font-size: 64px; color: #7f8c8d; margin-bottom: 20px;"></i>
+                    <p style="color: #7f8c8d;">Preview not available for ${material.type.toUpperCase()} files</p>
+                    <p style="color: #7f8c8d; font-size: 14px;">Click download to view the complete file</p>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="download-preview" class="action-btn materials-btn" style="padding: 10px 20px;">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button id="close-modal" class="modal-close-btn">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    document.getElementById('download-preview').addEventListener('click', () => {
+        downloadMaterial(material.name);
+    });
+    
+    document.getElementById('close-preview').addEventListener('click', () => {
+        document.querySelector('.modal-overlay').remove();
+    });
+    
+    const modal = document.querySelector('.modal-overlay');
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.addEventListener('keydown', function closeOnEscape(e) {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeOnEscape);
+        }
+    });
+}
+
+// Keep the existing drop confirmation and notification functions
+function showDropConfirmation(course) {
+    // ... (keep the existing drop confirmation function)
+}
+
+function showNotification(message, type = 'success') {
+    // ... (keep the existing notification function)
+}
+
+function downloadMaterial(filename) {
+    showNotification(`Downloading ${filename}...`, 'info');
+}
+
+function setupModalEvents() {
+    // ... (keep the existing modal setup function)
+}
+
+// Add favorites filter button
+function addFavoritesFilter() {
+    const filterContainer = document.querySelector('.filter-container');
+    const favoritesBtn = document.createElement('button');
+    favoritesBtn.className = 'filter-btn';
+    favoritesBtn.setAttribute('data-filter', 'favorites');
+    favoritesBtn.innerHTML = `<i class="fas fa-star"></i> Favorites (${favoriteCourses.length})`;
+    filterContainer.appendChild(favoritesBtn);
+    
+    favoritesBtn.addEventListener('click', function() {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = 'favorites';
+        currentView === 'table' ? populateTableView() : populateCardView();
+    });
+}
+
+// Add export functionality
+function addExportButton() {
+    const buttonContainer = document.querySelector('div[style*="text-align: center"]');
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'action-btn';
+    exportBtn.style.background = '#2ecc71';
+    exportBtn.style.color = 'white';
+    exportBtn.style.padding = '10px 20px';
+    exportBtn.style.marginRight = '10px';
+    exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Export Schedule';
+    buttonContainer.insertBefore(exportBtn, toggleViewBtn);
+    
+    exportBtn.addEventListener('click', () => {
+        const courses = getFilteredCourses();
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + ["Course Code,Title,Teacher,Schedule,Credits,Status"].join(",") + "\n"
+            + courses.map(course => 
+                `"${course.code}","${course.title}","${course.teacher}","${course.schedule}","${course.credits}","${course.status}"`
+            ).join("\n");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "my_courses.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('Course schedule exported successfully!', 'success');
+    });
+}
+
+// Initialize the page
+function init() {
+    // Create table header with sort
+    createTableHeader();
+    
+    // Update statistics
+    updateStatistics();
+    
+    // Populate initial table view
+    populateTableView();
+    
+    // Add favorites filter
+    addFavoritesFilter();
+    
+    // Add export button
+    addExportButton();
+    
+    // Back button functionality
+    backBtn.addEventListener('click', function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+        this.disabled = true;
+        
+        showNotification('Returning to Dashboard...', 'info');
+        
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+            // In real app: window.location.href = 'dashboard.html';
+            showNotification('Dashboard navigation simulated.', 'info');
+        }, 1500);
+    });
+    
+    // Toggle view button
+    toggleViewBtn.addEventListener('click', toggleView);
+    
+    // Search functionality with debounce
+    let searchTimeout;
+    searchBox.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentSearch = this.value;
+            currentView === 'table' ? populateTableView() : populateCardView();
+        }, 300);
+    });
+    
+    // Filter buttons (including dynamically added favorites)
+    const allFilterBtns = document.querySelectorAll('.filter-btn');
+    allFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            allFilterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            currentView === 'table' ? populateTableView() : populateCardView();
+        });
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + F to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchBox.focus();
+        }
+        
+        // Ctrl/Cmd + T to toggle view
+        if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+            e.preventDefault();
+            toggleView();
+        }
+        
+        // Ctrl/Cmd + E to export
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            document.querySelector('[style*="Export Schedule"]').click();
+        }
+        
+        // Escape to close modals
+        if (e.key === 'Escape') {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) modal.remove();
+        }
+    });
+    
+    // Show welcome message
+    setTimeout(() => {
+        const activeCourses = coursesData.filter(c => c.status === 'active').length;
+        showNotification(`Welcome! You have ${activeCourses} active courses this semester.`, 'success');
+    }, 1000);
+    
+    // Update favorites count periodically
+    setInterval(() => {
+        const favoritesBtn = document.querySelector('[data-filter="favorites"]');
+        if (favoritesBtn) {
+            favoritesBtn.innerHTML = `<i class="fas fa-star"></i> Favorites (${favoriteCourses.length})`;
+        }
+    }, 5000);
+}
+
+// Toggle view function
+function toggleView() {
+    if (currentView === 'table') {
+        currentView = 'card';
+        document.getElementById('courses-table').style.display = 'none';
+        courseCardsView.style.display = 'block';
+        populateCardView();
+        toggleViewBtn.innerHTML = '<i class="fas fa-table"></i> Switch to Table View';
+    } else {
+        currentView = 'table';
+        document.getElementById('courses-table').style.display = 'table';
+        courseCardsView.style.display = 'none';
+        populateTableView();
+        toggleViewBtn.innerHTML = '<i class="fas fa-th-large"></i> Switch to Card View';
+    }
+    
+    // Save view preference
+    localStorage.setItem('courseViewPreference', currentView);
+}
+
+// Load saved view preference
+const savedView = localStorage.getItem('courseViewPreference');
+if (savedView) {
+    currentView = savedView;
+    if (currentView === 'card') {
+        document.getElementById('courses-table').style.display = 'none';
+        courseCardsView.style.display = 'block';
+        toggleViewBtn.innerHTML = '<i class="fas fa-table"></i> Switch to Table View';
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', init);</script>
+
+</body>
+</html>

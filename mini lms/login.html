@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Mini LMS</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET & BASE STYLES ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== BACKGROUND ANIMATION ===== */
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(106, 17, 203, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(37, 117, 252, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(255, 65, 108, 0.1) 0%, transparent 50%);
+    z-index: -1;
+  }
+
+  /* Floating animation for background elements */
+  .floating-element {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 117, 252, 0.2));
+    animation: float 20s infinite linear;
+    z-index: -1;
+  }
+
+  .floating-element:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    left: -150px;
+    animation-duration: 25s;
+  }
+
+  .floating-element:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    bottom: -100px;
+    right: -100px;
+    animation-duration: 20s;
+    animation-direction: reverse;
+  }
+
+  .floating-element:nth-child(3) {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    right: 10%;
+    animation-duration: 15s;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(20px, 20px) rotate(90deg); }
+    50% { transform: translate(0, 40px) rotate(180deg); }
+    75% { transform: translate(-20px, 20px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+  }
+
+  /* ===== LOGIN CONTAINER ===== */
+  .login-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  @keyframes slideIn {
+    from { 
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ===== LOGO ===== */
+  .logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .logo p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ===== ROLE SELECTION ===== */
+  .role-section {
+    margin-bottom: 2rem;
+  }
+
+  .role-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    color: white;
+    font-weight: 600;
+  }
+
+  .role-options {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .role-option {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .role-option input {
+    display: none;
+  }
+
+  .role-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 120px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .role-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(106, 17, 203, 0.3);
+  }
+
+  .role-option input:checked + .role-card {
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 117, 252, 0.2));
+    border-color: #6a11cb;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .role-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+  }
+
+  .role-option input:checked + .role-card .role-icon {
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(106, 17, 203, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
+  }
+
+  .role-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: white;
+  }
+
+  .role-card p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ===== LOGIN FORM ===== */
+  .login-form {
+    margin-bottom: 2rem;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 1.8rem;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    padding: 1.2rem 1.2rem 1.2rem 3.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .input-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: #6a11cb;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.15);
+  }
+
+  .input-wrapper input:focus + i {
+    color: #6a11cb;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+
+  .password-toggle:hover {
+    color: #6a11cb;
+  }
+
+  /* ===== LOGIN BUTTON ===== */
+  .login-button {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  .login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
+  }
+
+  .login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(106, 17, 203, 0.4);
+  }
+
+  .login-button:hover::before {
+    left: 100%;
+  }
+
+  .login-button:active {
+    transform: translateY(0);
+  }
+
+  .login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ===== FORGOT PASSWORD & LINKS ===== */
+  .form-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .forgot-password {
+    color: #a5b4fc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .forgot-password:hover {
+    color: #6a11cb;
+    text-decoration: underline;
+  }
+
+  .contact-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .contact-info b {
+    color: white;
+    font-weight: 600;
+  }
+
+  .contact-info a {
+    color: #a5b4fc;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .contact-info a:hover {
+    color: #6a11cb;
+    text-decoration: underline;
+  }
+
+  /* ===== LOADING SPINNER ===== */
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== TOAST NOTIFICATION ===== */
+  .toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: white;
+    color: #1a1a2e;
+    padding: 1.2rem 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 400px;
+    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
+    border-left: 4px solid #6a11cb;
+  }
+
+  .toast.error {
+    border-left-color: #e74c3c;
+  }
+
+  .toast.success {
+    border-left-color: #2ecc71;
+  }
+
+  .toast.warning {
+    border-left-color: #f39c12;
+  }
+
+  .toast i {
+    font-size: 1.3rem;
+  }
+
+  .toast.error i {
+    color: #e74c3c;
+  }
+
+  .toast.success i {
+    color: #2ecc71;
+  }
+
+  .toast.warning i {
+    color: #f39c12;
+  }
+
+  .toast.info i {
+    color: #3498db;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
+  }
+
+  /* ===== DEMO CREDENTIALS ===== */
+  .demo-credentials {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-top: 2rem;
+    border-left: 4px solid #6a11cb;
+  }
+
+  .demo-credentials h4 {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .demo-credentials h4 i {
+    color: #6a11cb;
+  }
+
+  .credential-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .credential-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .credential-label {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .credential-value {
+    color: white;
+    font-weight: 500;
+  }
+
+  .try-demo {
+    background: rgba(106, 17, 203, 0.2);
+    color: #a5b4fc;
+    border: 1px solid rgba(106, 17, 203, 0.4);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.8rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .try-demo:hover {
+    background: rgba(106, 17, 203, 0.3);
+    color: white;
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 768px) {
+    body {
+      padding: 1.5rem;
+    }
+    
+    .login-container {
+      padding: 2rem;
+    }
+    
+    .logo h1 {
+      font-size: 2.8rem;
+    }
+    
+    .role-options {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .role-card {
+      width: 100%;
+      max-width: 200px;
+    }
+    
+    .floating-element:nth-child(3) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 1.5rem;
+    }
+    
+    .logo h1 {
+      font-size: 2.2rem;
+    }
+    
+    .role-section h2 {
+      font-size: 1.3rem;
+    }
+    
+    .input-wrapper input {
+      padding: 1rem 1rem 1rem 2.8rem;
+    }
+    
+    .toast {
+      left: 1rem;
+      right: 1rem;
+      max-width: none;
+    }
+  }
+
+  /* ===== SCROLLBAR STYLING ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a0cb9 0%, #1c65e0 100%);
+  }
+</style>
+</head>
+
+<body>
+  <!-- Background Floating Elements -->
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+
+  <!-- Main Login Container -->
+  <div class="login-container">
+    <!-- Logo -->
+    <div class="logo">
+      <h1>Mini LMS</h1>
+      <p>Learning Management System</p>
+    </div>
+
+    <!-- Role Selection -->
+    <div class="role-section">
+      <h2>Select Your Role</h2>
+      <div class="role-options">
+        <label class="role-option">
+          <input type="radio" name="role" value="student" checked>
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3>Student</h3>
+            <p>Access courses & materials</p>
+          </div>
+        </label>
+
+        <label class="role-option">
+          <input type="radio" name="role" value="teacher">
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3>Teacher</h3>
+            <p>Manage courses & students</p>
+          </div>
+        </label>
+
+        <label class="role-option">
+          <input type="radio" name="role" value="admin">
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <h3>Admin</h3>
+            <p>System administration</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <form class="login-form" id="loginForm">
+      <div class="input-group">
+        <label for="username"><i class="fas fa-user"></i> Username</label>
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input 
+            type="text" 
+            id="username" 
+            placeholder="Enter your username" 
+            required
+            autocomplete="username"
+          >
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="password"><i class="fas fa-lock"></i> Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Enter your password" 
+            required
+            autocomplete="current-password"
+          >
+          <button type="button" class="password-toggle" id="passwordToggle">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="login-button" id="loginButton">
+        <span id="buttonText">Login to Dashboard</span>
+      </button>
+    </form>
+
+    <!-- Demo Credentials -->
+    <div class="demo-credentials">
+      <h4><i class="fas fa-info-circle"></i> Demo Credentials</h4>
+      <div class="credential-item">
+        <span class="credential-label">Student:</span>
+        <span class="credential-value">abbas / password123</span>
+      </div>
+      <div class="credential-item">
+        <span class="credential-label">Teacher:</span>
+        <span class="credential-value">teacher / teach123</span>
+      </div>
+      <div class="credential-item">
+        <span class="credential-label">Admin:</span>
+        <span class="credential-value">admin / admin123</span>
+      </div>
+      <button type="button" class="try-demo" id="tryDemo">
+        <i class="fas fa-magic"></i> Try Demo Login
+      </button>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="form-footer">
+      <a href="#" class="forgot-password" id="forgotPassword">
+        <i class="fas fa-key"></i> Forgot Password?
+      </a>
+      <p class="contact-info">
+        For any queries, email us at 
+        <a href="mailto:minilms@gmail.com">
+          <b>minilms@gmail.com</b>
+        </a>
+        <br>
+        <small style="opacity: 0.7;">Or call: +1 (555) 123-4567</small>
+      </p>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"></div>
+
+<script>
+  // ====================
+  // DOM ELEMENTS
+  // ====================
+  const loginForm = document.getElementById('loginForm');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const passwordToggle = document.getElementById('passwordToggle');
+  const loginButton = document.getElementById('loginButton');
+  const buttonText = document.getElementById('buttonText');
+  const tryDemoBtn = document.getElementById('tryDemo');
+  const forgotPasswordBtn = document.getElementById('forgotPassword');
+  const roleOptions = document.querySelectorAll('input[name="role"]');
+  const toastContainer = document.getElementById('toastContainer');
+
+  // ====================
+  // DEMO CREDENTIALS
+  // ====================
+  const demoCredentials = {
+    student: { username: 'abbas', password: 'password123' },
+    teacher: { username: 'teacher', password: 'teach123' },
+    admin: { username: 'admin', password: 'admin123' }
+  };
+
+  // ====================
+  // UTILITY FUNCTIONS
+  // ====================
+
+  /**
+   * Shows a toast notification
+   * @param {string} message - Message to display
+   * @param {string} type - Type of toast (success, error, warning, info)
+   */
+  function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-times-circle' : 
+                type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+  /**
+   * Gets the selected role
+   * @returns {string} Selected role
+   */
+  function getSelectedRole() {
+    for (const option of roleOptions) {
+      if (option.checked) {
+        return option.value;
+      }
+    }
+    return 'student';
+  }
+
+  /**
+   * Toggles password visibility
+   */
+  function togglePasswordVisibility() {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    
+    const icon = passwordToggle.querySelector('i');
+    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    
+    // Add animation effect
+    passwordToggle.style.transform = 'translateY(-50%) scale(1.2)';
+    setTimeout(() => {
+      passwordToggle.style.transform = 'translateY(-50%) scale(1)';
+    }, 200);
+  }
+
+  /**
+   * Simulates login process
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} role - User role
+   */
+  function simulateLogin(username, password, role) {
+    // Show loading state
+    loginButton.disabled = true;
+    buttonText.innerHTML = '<span class="spinner"></span> Logging in...';
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      // Check credentials (in real app, this would be an API call)
+      const validCredentials = validateCredentials(username, password, role);
+      
+      if (validCredentials) {
+        // Success
+        showToast(`Welcome back, ${username}!`, 'success');
+        
+        // Animate success
+        loginButton.style.background = 'linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%)';
+        buttonText.innerHTML = '<i class="fas fa-check"></i> Login Successful!';
+        
+        // Redirect after delay
+        setTimeout(() => {
+          // In a real app, this would redirect to dashboard
+          // window.location.href = 'dashboard.html';
+          
+          // For demo, show a message
+          showToast(`Redirecting to ${role} dashboard...`, 'info');
+          
+          // Reset button after 2 seconds
+          setTimeout(() => {
+            resetLoginButton();
+          }, 2000);
+        }, 1500);
+      } else {
+        // Error
+        showToast('Invalid username or password. Please try again.', 'error');
+        loginButton.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+        buttonText.innerHTML = '<i class="fas fa-times"></i> Login Failed';
+        
+        // Add shake animation to form
+        loginForm.style.animation = 'shake 0.5s ease';
+        setTimeout(() => {
+          loginForm.style.animation = '';
+        }, 500);
+        
+        // Reset button after delay
+        setTimeout(resetLoginButton, 2000);
+      }
+    }, 2000);
+  }
+
+  /**
+   * Validates login credentials
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} role - User role
+   * @returns {boolean} True if valid
+   */
+  function validateCredentials(username, password, role) {
+    // In a real app, this would be an API call
+    // For demo, check against hardcoded credentials
+    const demoUser = demoCredentials[role];
+    
+    if (!demoUser) return false;
+    
+    return username.toLowerCase() === demoUser.username && 
+           password === demoUser.password;
+  }
+
+  /**
+   * Resets the login button to its original state
+   */
+  function resetLoginButton() {
+    loginButton.disabled = false;
+    loginButton.style.background = 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)';
+    buttonText.innerHTML = 'Login to Dashboard';
+  }
+
+  /**
+   * Handles form submission
+   * @param {Event} e - Form submit event
+   */
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+    const role = getSelectedRole();
+    
+    // Basic validation
+    if (!username) {
+      showToast('Please enter your username', 'warning');
+      usernameInput.focus();
+      return;
+    }
+    
+    if (!password) {
+      showToast('Please enter your password', 'warning');
+      passwordInput.focus();
+      return;
+    }
+    
+    // Simulate login
+    simulateLogin(username, password, role);
+  }
+
+  /**
+   * Fills form with demo credentials
+   */
+  function fillDemoCredentials() {
+    const role = getSelectedRole();
+    const credentials = demoCredentials[role];
+    
+    if (credentials) {
+      // Animate inputs
+      usernameInput.style.transform = 'scale(1.05)';
+      passwordInput.style.transform = 'scale(1.05)';
+      
+      setTimeout(() => {
+        usernameInput.value = credentials.username;
+        passwordInput.value = credentials.password;
+        
+        usernameInput.style.transform = '';
+        passwordInput.style.transform = '';
+        
+        // Show confirmation
+        showToast(`Demo ${role} credentials filled!`, 'success');
+        
+        // Auto-submit after 1 second
+        setTimeout(() => {
+          loginForm.dispatchEvent(new Event('submit'));
+        }, 1000);
+      }, 300);
+    }
+  }
+
+  /**
+   * Handles forgot password click
+   */
+  function handleForgotPassword() {
+    const role = getSelectedRole();
+    showToast(`Password reset email sent to ${role} email address`, 'info');
+    
+    // Show temporary modal effect
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+      <div style="background: white; color: #1a1a2e; padding: 2rem; border-radius: 20px; max-width: 400px; text-align: center;">
+        <h3 style="margin-bottom: 1rem; color: #6a11cb;">Reset Password</h3>
+        <p>Password reset instructions have been sent to your registered email.</p>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+          Check your inbox and follow the instructions.
+        </p>
+        <button style="background: #6a11cb; color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; margin-top: 1.5rem; cursor: pointer;">
+          OK
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close modal on click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.tagName === 'BUTTON') {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => modal.remove(), 300);
+      }
+    });
+  }
+
+  /**
+   * Updates form based on selected role
+   */
+  function updateFormForRole() {
+    const role = getSelectedRole();
+    
+    // Update button text
+    buttonText.textContent = `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+    
+    // Update placeholder based on role
+    const placeholders = {
+      student: 'Enter your student ID or username',
+      teacher: 'Enter your teacher ID or email',
+      admin: 'Enter your admin username'
+    };
+    
+    usernameInput.placeholder = placeholders[role] || 'Enter your username';
+    
+    // Add visual feedback
+    loginForm.style.transform = 'scale(1.02)';
+    setTimeout(() => {
+      loginForm.style.transform = '';
+    }, 300);
+    
+    // Show role change notification
+    showToast(`Switched to ${role} login`, 'info');
+  }
+
+  // ====================
+  // EVENT LISTENERS
+  // ====================
+
+  // Form submission
+  loginForm.addEventListener('submit', handleFormSubmit);
+
+  // Password visibility toggle
+  passwordToggle.addEventListener('click', togglePasswordVisibility);
+
+  // Try demo button
+  tryDemoBtn.addEventListener('click', fillDemoCredentials);
+
+  // Forgot password
+  forgotPasswordBtn.addEventListener('click', handleForgotPassword);
+
+  // Role selection change
+  roleOptions.forEach(option => {
+    option.addEventListener('change', updateFormForRole);
+  });
+
+  // Add shake animation CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // ====================
+  // ADDITIONAL FEATURES
+  // ====================
+
+  // Auto-focus username input
+  setTimeout(() => {
+    usernameInput.focus();
+  }, 500);
+
+  // Add enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.activeElement === passwordInput) {
+      loginForm.dispatchEvent(new Event('submit'));
+    }
+  });
+
+  // Show welcome message
+  setTimeout(() => {
+    showToast('Welcome to Mini LMS! Please login to continue.', 'info');
+  }, 1000);
+
+  // Add hover effect to role cards
+  document.querySelectorAll('.role-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      const isChecked = this.parentElement.querySelector('input').checked;
+      if (!isChecked) {
+        this.style.transform = '';
+      }
+    });
+  });
+
+  // ====================
+  // INITIALIZATION
+  // ====================
+  console.log('Mini LMS Login Page Loaded');
+  console.log('Demo Credentials Available:');
+  Object.entries(demoCredentials).forEach(([role, cred]) => {
+    console.log(`${role}: ${cred.username} / ${cred.password}`);
+  });
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Mini LMS</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET & BASE STYLES ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== BACKGROUND ANIMATION ===== */
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(106, 17, 203, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(37, 117, 252, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(255, 65, 108, 0.1) 0%, transparent 50%);
+    z-index: -1;
+  }
+
+  /* Floating animation for background elements */
+  .floating-element {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 117, 252, 0.2));
+    animation: float 20s infinite linear;
+    z-index: -1;
+  }
+
+  .floating-element:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    left: -150px;
+    animation-duration: 25s;
+  }
+
+  .floating-element:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    bottom: -100px;
+    right: -100px;
+    animation-duration: 20s;
+    animation-direction: reverse;
+  }
+
+  .floating-element:nth-child(3) {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    right: 10%;
+    animation-duration: 15s;
+  }
+
+  @keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(20px, 20px) rotate(90deg); }
+    50% { transform: translate(0, 40px) rotate(180deg); }
+    75% { transform: translate(-20px, 20px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+  }
+
+  /* ===== LOGIN CONTAINER ===== */
+  .login-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  @keyframes slideIn {
+    from { 
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ===== LOGO ===== */
+  .logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .logo p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ===== ROLE SELECTION ===== */
+  .role-section {
+    margin-bottom: 2rem;
+  }
+
+  .role-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    color: white;
+    font-weight: 600;
+  }
+
+  .role-options {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .role-option {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .role-option input {
+    display: none;
+  }
+
+  .role-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 120px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .role-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(106, 17, 203, 0.3);
+  }
+
+  .role-option input:checked + .role-card {
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.2), rgba(37, 117, 252, 0.2));
+    border-color: #6a11cb;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .role-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+  }
+
+  .role-option input:checked + .role-card .role-icon {
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(106, 17, 203, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
+  }
+
+  .role-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: white;
+  }
+
+  .role-card p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ===== LOGIN FORM ===== */
+  .login-form {
+    margin-bottom: 2rem;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 1.8rem;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    padding: 1.2rem 1.2rem 1.2rem 3.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .input-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: #6a11cb;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.15);
+  }
+
+  .input-wrapper input:focus + i {
+    color: #6a11cb;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+
+  .password-toggle:hover {
+    color: #6a11cb;
+  }
+
+  /* ===== LOGIN BUTTON ===== */
+  .login-button {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+  }
+
+  .login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
+  }
+
+  .login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(106, 17, 203, 0.4);
+  }
+
+  .login-button:hover::before {
+    left: 100%;
+  }
+
+  .login-button:active {
+    transform: translateY(0);
+  }
+
+  .login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ===== FORGOT PASSWORD & LINKS ===== */
+  .form-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .forgot-password {
+    color: #a5b4fc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .forgot-password:hover {
+    color: #6a11cb;
+    text-decoration: underline;
+  }
+
+  .contact-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .contact-info b {
+    color: white;
+    font-weight: 600;
+  }
+
+  .contact-info a {
+    color: #a5b4fc;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .contact-info a:hover {
+    color: #6a11cb;
+    text-decoration: underline;
+  }
+
+  /* ===== LOADING SPINNER ===== */
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===== TOAST NOTIFICATION ===== */
+  .toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: white;
+    color: #1a1a2e;
+    padding: 1.2rem 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 400px;
+    animation: slideInRight 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
+    border-left: 4px solid #6a11cb;
+  }
+
+  .toast.error {
+    border-left-color: #e74c3c;
+  }
+
+  .toast.success {
+    border-left-color: #2ecc71;
+  }
+
+  .toast.warning {
+    border-left-color: #f39c12;
+  }
+
+  .toast i {
+    font-size: 1.3rem;
+  }
+
+  .toast.error i {
+    color: #e74c3c;
+  }
+
+  .toast.success i {
+    color: #2ecc71;
+  }
+
+  .toast.warning i {
+    color: #f39c12;
+  }
+
+  .toast.info i {
+    color: #3498db;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
+  }
+
+  /* ===== DEMO CREDENTIALS ===== */
+  .demo-credentials {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-top: 2rem;
+    border-left: 4px solid #6a11cb;
+  }
+
+  .demo-credentials h4 {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .demo-credentials h4 i {
+    color: #6a11cb;
+  }
+
+  .credential-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .credential-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .credential-label {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .credential-value {
+    color: white;
+    font-weight: 500;
+  }
+
+  .try-demo {
+    background: rgba(106, 17, 203, 0.2);
+    color: #a5b4fc;
+    border: 1px solid rgba(106, 17, 203, 0.4);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.8rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .try-demo:hover {
+    background: rgba(106, 17, 203, 0.3);
+    color: white;
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 768px) {
+    body {
+      padding: 1.5rem;
+    }
+    
+    .login-container {
+      padding: 2rem;
+    }
+    
+    .logo h1 {
+      font-size: 2.8rem;
+    }
+    
+    .role-options {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .role-card {
+      width: 100%;
+      max-width: 200px;
+    }
+    
+    .floating-element:nth-child(3) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 1.5rem;
+    }
+    
+    .logo h1 {
+      font-size: 2.2rem;
+    }
+    
+    .role-section h2 {
+      font-size: 1.3rem;
+    }
+    
+    .input-wrapper input {
+      padding: 1rem 1rem 1rem 2.8rem;
+    }
+    
+    .toast {
+      left: 1rem;
+      right: 1rem;
+      max-width: none;
+    }
+  }
+
+  /* ===== SCROLLBAR STYLING ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a0cb9 0%, #1c65e0 100%);
+  }
+</style>
+</head>
+
+<body>
+  <!-- Background Floating Elements -->
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+
+  <!-- Main Login Container -->
+  <div class="login-container">
+    <!-- Logo -->
+    <div class="logo">
+      <h1>Mini LMS</h1>
+      <p>Learning Management System</p>
+    </div>
+
+    <!-- Role Selection -->
+    <div class="role-section">
+      <h2>Select Your Role</h2>
+      <div class="role-options">
+        <label class="role-option">
+          <input type="radio" name="role" value="student" checked>
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3>Student</h3>
+            <p>Access courses & materials</p>
+          </div>
+        </label>
+
+        <label class="role-option">
+          <input type="radio" name="role" value="teacher">
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3>Teacher</h3>
+            <p>Manage courses & students</p>
+          </div>
+        </label>
+
+        <label class="role-option">
+          <input type="radio" name="role" value="admin">
+          <div class="role-card">
+            <div class="role-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <h3>Admin</h3>
+            <p>System administration</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <form class="login-form" id="loginForm">
+      <div class="input-group">
+        <label for="username"><i class="fas fa-user"></i> Username</label>
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input 
+            type="text" 
+            id="username" 
+            placeholder="Enter your username" 
+            required
+            autocomplete="username"
+          >
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="password"><i class="fas fa-lock"></i> Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Enter your password" 
+            required
+            autocomplete="current-password"
+          >
+          <button type="button" class="password-toggle" id="passwordToggle">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="login-button" id="loginButton">
+        <span id="buttonText">Login to Dashboard</span>
+      </button>
+    </form>
+
+    <!-- Demo Credentials -->
+    <div class="demo-credentials">
+      <h4><i class="fas fa-info-circle"></i> Demo Credentials</h4>
+      <div class="credential-item">
+        <span class="credential-label">Student:</span>
+        <span class="credential-value">abbas / password123</span>
+      </div>
+      <div class="credential-item">
+        <span class="credential-label">Teacher:</span>
+        <span class="credential-value">teacher / teach123</span>
+      </div>
+      <div class="credential-item">
+        <span class="credential-label">Admin:</span>
+        <span class="credential-value">admin / admin123</span>
+      </div>
+      <button type="button" class="try-demo" id="tryDemo">
+        <i class="fas fa-magic"></i> Try Demo Login
+      </button>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="form-footer">
+      <a href="#" class="forgot-password" id="forgotPassword">
+        <i class="fas fa-key"></i> Forgot Password?
+      </a>
+      <p class="contact-info">
+        For any queries, email us at 
+        <a href="mailto:minilms@gmail.com">
+          <b>minilms@gmail.com</b>
+        </a>
+        <br>
+        <small style="opacity: 0.7;">Or call: +1 (555) 123-4567</small>
+      </p>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"></div>
+
+<script>
+  // ====================
+  // DOM ELEMENTS
+  // ====================
+  const loginForm = document.getElementById('loginForm');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const passwordToggle = document.getElementById('passwordToggle');
+  const loginButton = document.getElementById('loginButton');
+  const buttonText = document.getElementById('buttonText');
+  const tryDemoBtn = document.getElementById('tryDemo');
+  const forgotPasswordBtn = document.getElementById('forgotPassword');
+  const roleOptions = document.querySelectorAll('input[name="role"]');
+  const toastContainer = document.getElementById('toastContainer');
+
+  // ====================
+  // DEMO CREDENTIALS
+  // ====================
+  const demoCredentials = {
+    student: { username: 'abbas', password: 'password123' },
+    teacher: { username: 'teacher', password: 'teach123' },
+    admin: { username: 'admin', password: 'admin123' }
+  };
+
+  // ====================
+  // UTILITY FUNCTIONS
+  // ====================
+
+  /**
+   * Shows a toast notification
+   * @param {string} message - Message to display
+   * @param {string} type - Type of toast (success, error, warning, info)
+   */
+  function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-times-circle' : 
+                type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+  /**
+   * Gets the selected role
+   * @returns {string} Selected role
+   */
+  function getSelectedRole() {
+    for (const option of roleOptions) {
+      if (option.checked) {
+        return option.value;
+      }
+    }
+    return 'student';
+  }
+
+  /**
+   * Toggles password visibility
+   */
+  function togglePasswordVisibility() {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    
+    const icon = passwordToggle.querySelector('i');
+    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    
+    // Add animation effect
+    passwordToggle.style.transform = 'translateY(-50%) scale(1.2)';
+    setTimeout(() => {
+      passwordToggle.style.transform = 'translateY(-50%) scale(1)';
+    }, 200);
+  }
+
+  /**
+   * Simulates login process
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} role - User role
+   */
+  function simulateLogin(username, password, role) {
+    // Show loading state
+    loginButton.disabled = true;
+    buttonText.innerHTML = '<span class="spinner"></span> Logging in...';
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      // Check credentials (in real app, this would be an API call)
+      const validCredentials = validateCredentials(username, password, role);
+      
+      if (validCredentials) {
+        // Success
+        showToast(`Welcome back, ${username}!`, 'success');
+        
+        // Animate success
+        loginButton.style.background = 'linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%)';
+        buttonText.innerHTML = '<i class="fas fa-check"></i> Login Successful!';
+        
+        // Redirect after delay
+        setTimeout(() => {
+          // In a real app, this would redirect to dashboard
+          // window.location.href = 'dashboard.html';
+          
+          // For demo, show a message
+          showToast(`Redirecting to ${role} dashboard...`, 'info');
+          
+          // Reset button after 2 seconds
+          setTimeout(() => {
+            resetLoginButton();
+          }, 2000);
+        }, 1500);
+      } else {
+        // Error
+        showToast('Invalid username or password. Please try again.', 'error');
+        loginButton.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+        buttonText.innerHTML = '<i class="fas fa-times"></i> Login Failed';
+        
+        // Add shake animation to form
+        loginForm.style.animation = 'shake 0.5s ease';
+        setTimeout(() => {
+          loginForm.style.animation = '';
+        }, 500);
+        
+        // Reset button after delay
+        setTimeout(resetLoginButton, 2000);
+      }
+    }, 2000);
+  }
+
+  /**
+   * Validates login credentials
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} role - User role
+   * @returns {boolean} True if valid
+   */
+  function validateCredentials(username, password, role) {
+    // In a real app, this would be an API call
+    // For demo, check against hardcoded credentials
+    const demoUser = demoCredentials[role];
+    
+    if (!demoUser) return false;
+    
+    return username.toLowerCase() === demoUser.username && 
+           password === demoUser.password;
+  }
+
+  /**
+   * Resets the login button to its original state
+   */
+  function resetLoginButton() {
+    loginButton.disabled = false;
+    loginButton.style.background = 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)';
+    buttonText.innerHTML = 'Login to Dashboard';
+  }
+
+  /**
+   * Handles form submission
+   * @param {Event} e - Form submit event
+   */
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+    const role = getSelectedRole();
+    
+    // Basic validation
+    if (!username) {
+      showToast('Please enter your username', 'warning');
+      usernameInput.focus();
+      return;
+    }
+    
+    if (!password) {
+      showToast('Please enter your password', 'warning');
+      passwordInput.focus();
+      return;
+    }
+    
+    // Simulate login
+    simulateLogin(username, password, role);
+  }
+
+  /**
+   * Fills form with demo credentials
+   */
+  function fillDemoCredentials() {
+    const role = getSelectedRole();
+    const credentials = demoCredentials[role];
+    
+    if (credentials) {
+      // Animate inputs
+      usernameInput.style.transform = 'scale(1.05)';
+      passwordInput.style.transform = 'scale(1.05)';
+      
+      setTimeout(() => {
+        usernameInput.value = credentials.username;
+        passwordInput.value = credentials.password;
+        
+        usernameInput.style.transform = '';
+        passwordInput.style.transform = '';
+        
+        // Show confirmation
+        showToast(`Demo ${role} credentials filled!`, 'success');
+        
+        // Auto-submit after 1 second
+        setTimeout(() => {
+          loginForm.dispatchEvent(new Event('submit'));
+        }, 1000);
+      }, 300);
+    }
+  }
+
+  /**
+   * Handles forgot password click
+   */
+  function handleForgotPassword() {
+    const role = getSelectedRole();
+    showToast(`Password reset email sent to ${role} email address`, 'info');
+    
+    // Show temporary modal effect
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+      <div style="background: white; color: #1a1a2e; padding: 2rem; border-radius: 20px; max-width: 400px; text-align: center;">
+        <h3 style="margin-bottom: 1rem; color: #6a11cb;">Reset Password</h3>
+        <p>Password reset instructions have been sent to your registered email.</p>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
+          Check your inbox and follow the instructions.
+        </p>
+        <button style="background: #6a11cb; color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; margin-top: 1.5rem; cursor: pointer;">
+          OK
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close modal on click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target.tagName === 'BUTTON') {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => modal.remove(), 300);
+      }
+    });
+  }
+
+  /**
+   * Updates form based on selected role
+   */
+  function updateFormForRole() {
+    const role = getSelectedRole();
+    
+    // Update button text
+    buttonText.textContent = `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+    
+    // Update placeholder based on role
+    const placeholders = {
+      student: 'Enter your student ID or username',
+      teacher: 'Enter your teacher ID or email',
+      admin: 'Enter your admin username'
+    };
+    
+    usernameInput.placeholder = placeholders[role] || 'Enter your username';
+    
+    // Add visual feedback
+    loginForm.style.transform = 'scale(1.02)';
+    setTimeout(() => {
+      loginForm.style.transform = '';
+    }, 300);
+    
+    // Show role change notification
+    showToast(`Switched to ${role} login`, 'info');
+  }
+
+  // ====================
+  // EVENT LISTENERS
+  // ====================
+
+  // Form submission
+  loginForm.addEventListener('submit', handleFormSubmit);
+
+  // Password visibility toggle
+  passwordToggle.addEventListener('click', togglePasswordVisibility);
+
+  // Try demo button
+  tryDemoBtn.addEventListener('click', fillDemoCredentials);
+
+  // Forgot password
+  forgotPasswordBtn.addEventListener('click', handleForgotPassword);
+
+  // Role selection change
+  roleOptions.forEach(option => {
+    option.addEventListener('change', updateFormForRole);
+  });
+
+  // Add shake animation CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // ====================
+  // ADDITIONAL FEATURES
+  // ====================
+
+  // Auto-focus username input
+  setTimeout(() => {
+    usernameInput.focus();
+  }, 500);
+
+  // Add enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.activeElement === passwordInput) {
+      loginForm.dispatchEvent(new Event('submit'));
+    }
+  });
+
+  // Show welcome message
+  setTimeout(() => {
+    showToast('Welcome to Mini LMS! Please login to continue.', 'info');
+  }, 1000);
+
+  // Add hover effect to role cards
+  document.querySelectorAll('.role-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      const isChecked = this.parentElement.querySelector('input').checked;
+      if (!isChecked) {
+        this.style.transform = '';
+      }
+    });
+  });
+
+  // ====================
+  // INITIALIZATION
+  // ====================
+  console.log('Mini LMS Login Page Loaded');
+  console.log('Demo Credentials Available:');
+  Object.entries(demoCredentials).forEach(([role, cred]) => {
+    console.log(`${role}: ${cred.username} / ${cred.password}`);
+  });
+</script>
+</body>
+</html>
