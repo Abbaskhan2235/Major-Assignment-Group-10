@@ -1,3 +1,154 @@
+<?php
+// dashboard.php
+
+session_start();
+require_once 'config/database.php';
+require_once 'includes/session.php';
+
+// Check if user is logged in
+if (!isLoggedIn()) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get user data from session
+$user_id = $_SESSION['user_id'];
+$username = $_SESSION['username'];
+$full_name = $_SESSION['full_name'];
+$role = $_SESSION['role'];
+$email = $_SESSION['email'];
+
+// Database connection
+$database = new Database();
+$db = $database->getConnection();
+
+// Get user statistics based on role
+$total_courses = 0;
+$attendance_rate = 0;
+$current_gpa = 0;
+$pending_tasks = 0;
+
+if ($role == 'student') {
+    // Get enrolled courses count
+    $query = "SELECT COUNT(*) as total FROM enrollments WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total'];
+    
+    // Get average attendance rate
+    $query = "SELECT 
+                (COUNT(CASE WHEN status = 'present' THEN 1 END) * 100.0 / COUNT(*)) as attendance_rate
+              FROM attendance 
+              WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $attendance_rate = round($result['attendance_rate'] ?? 0, 1);
+    
+    // Get current GPA
+    $query = "SELECT AVG(percentage) as gpa FROM marks WHERE student_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $current_gpa = round(($result['gpa'] ?? 0) / 25, 2); // Convert percentage to 4.0 scale
+    
+    // Get pending assignments (you'll need to create an assignments table)
+    $pending_tasks = 3; // Default value
+    
+} elseif ($role == 'teacher') {
+    // Teacher statistics
+    $query = "SELECT COUNT(*) as total FROM courses WHERE teacher_id = :user_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total'];
+    
+    $attendance_rate = 98; // Default for teachers
+    $current_gpa = 0; // Not applicable for teachers
+    $pending_tasks = 5; // Default value
+} else {
+    // Admin statistics
+    $query = "SELECT COUNT(*) as total FROM users WHERE role = 'student'";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $total_courses = $result['total']; // Repurposed as total students
+    
+    $attendance_rate = 95; // Default overall attendance
+    $current_gpa = 3.6; // Default overall GPA
+    $pending_tasks = 12; // Default pending tasks
+}
+
+// Get enrolled courses for students
+$enrolled_courses = [];
+if ($role == 'student') {
+    $query = "SELECT c.* FROM courses c
+              INNER JOIN enrollments e ON c.id = e.course_id
+              WHERE e.student_id = :user_id
+              LIMIT 5";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $enrolled_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Get upcoming events (timetable)
+$upcoming_events = [];
+$query = "SELECT 
+            c.course_code, 
+            c.course_name,
+            t.day_of_week,
+            t.start_time,
+            t.end_time,
+            t.room
+          FROM timetable t
+          INNER JOIN courses c ON t.course_id = c.id
+          WHERE t.day_of_week IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+          ORDER BY 
+            FIELD(t.day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),
+            t.start_time
+          LIMIT 4";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$upcoming_events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get recent activity
+$recent_activity = [];
+if ($role == 'student') {
+    $query = "SELECT 
+                'Grade Updated' as title,
+                CONCAT('Your grade for ', c.course_code, ' is now ', 
+                       CASE 
+                         WHEN m.percentage >= 90 THEN 'A'
+                         WHEN m.percentage >= 80 THEN 'B'
+                         WHEN m.percentage >= 70 THEN 'C'
+                         WHEN m.percentage >= 60 THEN 'D'
+                         ELSE 'F'
+                       END) as description,
+                DATE_FORMAT(m.recorded_at, '%H:%i') as time_ago
+              FROM marks m
+              INNER JOIN courses c ON m.course_id = c.id
+              WHERE m.student_id = :user_id
+              ORDER BY m.recorded_at DESC
+              LIMIT 5";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $recent_activity = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
