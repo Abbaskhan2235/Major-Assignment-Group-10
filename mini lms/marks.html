@@ -4,53 +4,1749 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Internal Marks - Mini LMS</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Chart.js for graphs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* ===== RESET & BASE STYLES ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== TOP NAVIGATION BAR ===== */
+  .top-bar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 1.2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo i {
+    font-size: 1.5rem;
+    color: #6a11cb;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
+
+  .logo h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+  }
+
+  .user-info img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(106, 17, 203, 0.3);
+  }
+
+  /* ===== MAIN CONTAINER ===== */
+  .container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* ===== PAGE HEADER ===== */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .page-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .page-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .action-btn {
+    background: white;
+    border: 2px solid #e2e8f0;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    transition: all 0.3s ease;
+    color: #475569;
+  }
+
+  .action-btn:hover {
+    background: #f8fafc;
+    border-color: #6a11cb;
+    color: #6a11cb;
+    transform: translateY(-2px);
+  }
+
+  /* ===== STATS SUMMARY ===== */
+  .stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    border-top: 4px solid transparent;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .stat-card:nth-child(1) {
+    border-top-color: #6a11cb;
+  }
+
+  .stat-card:nth-child(2) {
+    border-top-color: #2ecc71;
+  }
+
+  .stat-card:nth-child(3) {
+    border-top-color: #f39c12;
+  }
+
+  .stat-card:nth-child(4) {
+    border-top-color: #3498db;
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-card:nth-child(1) .stat-icon {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .stat-card:nth-child(2) .stat-icon {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .stat-card:nth-child(3) .stat-icon {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  .stat-card:nth-child(4) .stat-icon {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  }
+
+  .stat-card h3 {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card:nth-child(1) .progress-fill {
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .stat-card:nth-child(2) .progress-fill {
+    background: linear-gradient(90deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .stat-card:nth-child(3) .progress-fill {
+    background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  .stat-card:nth-child(4) .progress-fill {
+    background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+  }
+
+  /* ===== CHART SECTION ===== */
+  .chart-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 1024px) {
+    .chart-section {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.3rem;
+    color: #1a1a2e;
+  }
+
+  .chart-filters {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chart-filter {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .chart-filter.active {
+    background: #6a11cb;
+    color: white;
+    border-color: #6a11cb;
+  }
+
+  .chart-filter:hover:not(.active) {
+    background: #e2e8f0;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+
+  /* ===== MARKS TABLE ===== */
+  .table-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+  }
+
+  th {
+    padding: 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  th:first-child {
+    padding-left: 2.5rem;
+  }
+
+  th:last-child {
+    padding-right: 2.5rem;
+  }
+
+  tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  td {
+    padding: 1.5rem;
+    color: #475569;
+  }
+
+  td:first-child {
+    padding-left: 2.5rem;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  td:last-child {
+    padding-right: 2.5rem;
+  }
+
+  /* Course cell */
+  .course-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .course-title:hover {
+    color: #6a11cb;
+    transform: translateX(5px);
+  }
+
+  .course-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  /* Dynamic course icon colors */
+  .course-icon.programming {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  }
+
+  .course-icon.data-structures {
+    background: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+  }
+
+  .course-icon.communication {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  }
+
+  .course-icon.database {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  }
+
+  .course-icon.web-dev {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  }
+
+  /* Marks cells */
+  .marks-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .marks-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .marks-percentage {
+    font-size: 0.85rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .percentage-indicator {
+    width: 60px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .percentage-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* Total cell */
+  .total-cell {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .grade-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    width: fit-content;
+  }
+
+  .grade-badge.A {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+  }
+
+  .grade-badge.B {
+    background: rgba(243, 156, 18, 0.1);
+    color: #f39c12;
+  }
+
+  .grade-badge.C {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+  }
+
+  /* ===== PERFORMANCE INSIGHTS ===== */
+  .performance-insights {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .insights-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .insights-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.3rem;
+    color: #1a1a2e;
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .insight-card {
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+  }
+
+  .insight-card.best {
+    border-left-color: #2ecc71;
+  }
+
+  .insight-card.improvement {
+    border-left-color: #f39c12;
+  }
+
+  .insight-card.trend {
+    border-left-color: #3498db;
+  }
+
+  .insight-card h4 {
+    font-size: 1rem;
+    color: #475569;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .insight-card p {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* ===== BACK BUTTON ===== */
+  .back-btn {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .back-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s;
+  }
+
+  .back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-btn:hover::before {
+    left: 100%;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .modal-header h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: #1a1a2e;
+  }
+
+  .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.3s ease;
+  }
+
+  .modal-close-btn:hover {
+    color: #e74c3c;
+    transform: rotate(90deg);
+  }
+
+  /* ===== TOAST NOTIFICATION ===== */
+  .toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    color: #1a1a2e;
+    padding: 1.2rem 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid #6a11cb;
+    animation: slideInRight 0.5s ease;
+    max-width: 400px;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .toast.success {
+    border-left-color: #2ecc71;
+  }
+
+  .toast.warning {
+    border-left-color: #f39c12;
+  }
+
+  .toast.error {
+    border-left-color: #e74c3c;
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 1024px) {
+    .stats-summary {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      min-width: 900px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .top-bar {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .action-btn {
+      flex: 1;
+      justify-content: center;
+    }
+    
+    .stats-summary {
+      grid-template-columns: 1fr;
+    }
+    
+    .insights-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .chart-filters {
+      flex-wrap: wrap;
+    }
+    
+    .chart-filter {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .modal-content {
+      padding: 1.5rem;
+    }
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tbody tr {
+    animation: fadeInRow 0.5s ease forwards;
+  }
+
+  tbody tr:nth-child(1) { animation-delay: 0.1s; }
+  tbody tr:nth-child(2) { animation-delay: 0.2s; }
+  tbody tr:nth-child(3) { animation-delay: 0.3s; }
+  tbody tr:nth-child(4) { animation-delay: 0.4s; }
+  tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+  /* ===== SCROLLBAR STYLING ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a0cb9 0%, #1c65e0 100%);
+  }
+</style>
 </head>
 
 <body>
 
-<div class="top-bar">Internal Marks</div>
+<!-- Top Navigation Bar -->
+<div class="top-bar">
+  <div class="logo">
+    <i class="fas fa-chart-line"></i>
+    <h1>Internal Marks Record</h1>
+  </div>
+  
+  <div class="user-info">
+    <img src="https://ui-avatars.com/api/?name=John+Doe&background=6a11cb&color=fff" alt="Student">
+    <span>John Doe | ID: 14656</span>
+  </div>
+</div>
 
+<!-- Main Container -->
 <div class="container">
-  <h2>Marks Summary</h2>
-
-  <table>
-    <tr>
-      <th>Course</th>
-      <th>Assignment</th>
-      <th>Quiz</th>
-      <th>Midterm</th>
-      <th>Total</th>
-    </tr>
-
-    <tr>
-      <td>Programming</td>
-      <td>18 / 20</td>
-      <td>9 / 10</td>
-      <td>24 / 30</td>
-      <td>51 / 60</td>
-    </tr>
-
-    <tr>
-      <td>Data Structures</td>
-      <td>15 / 20</td>
-      <td>8 / 10</td>
-      <td>22 / 30</td>
-      <td>45 / 60</td>
-    </tr>
-
-    <tr>
-      <td>Communication Skills</td>
-      <td>19 / 20</td>
-      <td>10 / 10</td>
-      <td>27 / 30</td>
-      <td>56 / 60</td>
-    </tr>
-
-  </table>
-
-  <button class="back-btn">Back to Dashboard</button>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Marks Summary & Analytics</h2>
+    <div class="header-actions">
+      <button class="action-btn" id="export-btn">
+        <i class="fas fa-file-export"></i> Export Report
+      </button>
+      <button class="action-btn" id="print-btn">
+        <i class="fas fa-print"></i> Print
+      </button>
+      <button class="action-btn" id="refresh-btn">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+  </div>
+  
+  <!-- Stats Summary -->
+  <div class="stats-summary">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-percentage"></i>
+      </div>
+      <h3>Overall Average</h3>
+      <div class="value" id="overall-average">85%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="overall-progress" style="width: 85%"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-star"></i>
+      </div>
+      <h3>Best Course</h3>
+      <div class="value" id="best-course">Communication</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 93%"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-trending-up"></i>
+      </div>
+      <h3>Improvement</h3>
+      <div class="value" id="improvement-rate">+8.5%</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 65%"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-medal"></i>
+      </div>
+      <h3>Current Rank</h3>
+      <div class="value" id="current-rank">12/150</div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 92%"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Chart Section -->
+  <div class="chart-section">
+    <div class="chart-container">
+      <div class="chart-header">
+        <h3>Performance Trend</h3>
+        <div class="chart-filters">
+          <button class="chart-filter active" data-period="semester">This Semester</button>
+          <button class="chart-filter" data-period="month">Monthly</button>
+          <button class="chart-filter" data-period="weekly">Weekly</button>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="performanceChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-container">
+      <div class="chart-header">
+        <h3>Grade Distribution</h3>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="gradeChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Marks Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Assignment (20)</th>
+          <th>Quiz (10)</th>
+          <th>Midterm (30)</th>
+          <th>Total (60)</th>
+          <th>Grade</th>
+        </tr>
+      </thead>
+      <tbody id="marks-table-body">
+        <!-- Table rows will be populated by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Performance Insights -->
+  <div class="performance-insights">
+    <div class="insights-header">
+      <h3><i class="fas fa-lightbulb"></i> Performance Insights</h3>
+    </div>
+    <div class="insights-grid">
+      <div class="insight-card best">
+        <h4><i class="fas fa-trophy"></i> Best Performing Course</h4>
+        <p>Communication Skills is your strongest subject with 93% average. Your presentation skills and written assignments are excellent.</p>
+      </div>
+      <div class="insight-card improvement">
+        <h4><i class="fas fa-chart-line"></i> Area for Improvement</h4>
+        <p>Data Structures could use more attention. Focus on algorithm complexity and practice more programming exercises.</p>
+      </div>
+      <div class="insight-card trend">
+        <h4><i class="fas fa-bullseye"></i> Performance Trend</h4>
+        <p>Your marks are improving by 8.5% compared to last semester. Keep up the consistent effort in assignments.</p>
+      </div>
+    </div>
+  </div>
+  
+  <button class="back-btn" id="back-to-dashboard">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </button>
 
 </div>
 
+<!-- Toast Notification Container -->
+<div id="toastContainer"></div>
+
+<script>
+  // ====================
+  // MARKS DATA
+  // ====================
+  const marksData = [
+    {
+      id: 1,
+      course: "Programming",
+      code: "CS101",
+      instructor: "Dr. Smith",
+      assignments: { obtained: 18, total: 20, weight: 20 },
+      quizzes: { obtained: 9, total: 10, weight: 10 },
+      midterm: { obtained: 24, total: 30, weight: 30 },
+      total: { obtained: 51, total: 60 },
+      grade: "A-",
+      lastUpdated: "2024-03-15",
+      trend: "up",
+      performance: [70, 75, 80, 85, 82, 85]
+    },
+    {
+      id: 2,
+      course: "Data Structures",
+      code: "CS201",
+      instructor: "Prof. Johnson",
+      assignments: { obtained: 15, total: 20, weight: 20 },
+      quizzes: { obtained: 8, total: 10, weight: 10 },
+      midterm: { obtained: 22, total: 30, weight: 30 },
+      total: { obtained: 45, total: 60 },
+      grade: "B+",
+      lastUpdated: "2024-03-14",
+      trend: "stable",
+      performance: [65, 68, 70, 72, 73, 75]
+    },
+    {
+      id: 3,
+      course: "Communication Skills",
+      code: "ENG101",
+      instructor: "Dr. Williams",
+      assignments: { obtained: 19, total: 20, weight: 20 },
+      quizzes: { obtained: 10, total: 10, weight: 10 },
+      midterm: { obtained: 27, total: 30, weight: 30 },
+      total: { obtained: 56, total: 60 },
+      grade: "A",
+      lastUpdated: "2024-03-16",
+      trend: "up",
+      performance: [85, 88, 90, 92, 91, 93]
+    },
+    {
+      id: 4,
+      course: "Database Systems",
+      code: "CS401",
+      instructor: "Prof. Brown",
+      assignments: { obtained: 17, total: 20, weight: 20 },
+      quizzes: { obtained: 9, total: 10, weight: 10 },
+      midterm: { obtained: 25, total: 30, weight: 30 },
+      total: { obtained: 51, total: 60 },
+      grade: "A-",
+      lastUpdated: "2024-03-13",
+      trend: "up",
+      performance: [75, 78, 80, 82, 83, 85]
+    },
+    {
+      id: 5,
+      course: "Web Development",
+      code: "CS501",
+      instructor: "Dr. Davis",
+      assignments: { obtained: 16, total: 20, weight: 20 },
+      quizzes: { obtained: 8, total: 10, weight: 10 },
+      midterm: { obtained: 23, total: 30, weight: 30 },
+      total: { obtained: 47, total: 60 },
+      grade: "B",
+      lastUpdated: "2024-03-12",
+      trend: "down",
+      performance: [80, 78, 77, 76, 77, 78]
+    }
+  ];
+
+  // ====================
+  // DOM ELEMENTS
+  // ====================
+  const marksTableBody = document.getElementById('marks-table-body');
+  const backBtn = document.getElementById('back-to-dashboard');
+  const exportBtn = document.getElementById('export-btn');
+  const printBtn = document.getElementById('print-btn');
+  const refreshBtn = document.getElementById('refresh-btn');
+  const overallAverageEl = document.getElementById('overall-average');
+  const bestCourseEl = document.getElementById('best-course');
+  const improvementRateEl = document.getElementById('improvement-rate');
+  const currentRankEl = document.getElementById('current-rank');
+  const overallProgressEl = document.getElementById('overall-progress');
+  const chartFilters = document.querySelectorAll('.chart-filter');
+  const toastContainer = document.getElementById('toastContainer');
+
+  // Chart instances
+  let performanceChart = null;
+  let gradeChart = null;
+
+  // ====================
+  // UTILITY FUNCTIONS
+  // ====================
+
+  /**
+   * Calculate percentage from obtained and total marks
+   * @param {number} obtained - Obtained marks
+   * @param {number} total - Total marks
+   * @returns {number} Percentage
+   */
+  function calculatePercentage(obtained, total) {
+    return Math.round((obtained / total) * 100);
+  }
+
+  /**
+   * Get color based on percentage
+   * @param {number} percentage - Percentage value
+   * @returns {string} Color class
+   */
+  function getPercentageColor(percentage) {
+    if (percentage >= 90) return '#2ecc71';
+    if (percentage >= 80) return '#f39c12';
+    return '#e74c3c';
+  }
+
+  /**
+   * Calculate grade from percentage
+   * @param {number} percentage - Percentage value
+   * @returns {string} Grade
+   */
+  function calculateGrade(percentage) {
+    if (percentage >= 90) return 'A';
+    if (percentage >= 85) return 'A-';
+    if (percentage >= 80) return 'B+';
+    if (percentage >= 75) return 'B';
+    if (percentage >= 70) return 'B-';
+    if (percentage >= 65) return 'C+';
+    if (percentage >= 60) return 'C';
+    if (percentage >= 55) return 'C-';
+    return 'F';
+  }
+
+  /**
+   * Calculate overall statistics from marks data
+   */
+  function calculateStatistics() {
+    let totalPercentage = 0;
+    let bestCourse = { name: '', percentage: 0 };
+    let totalCourses = marksData.length;
+    
+    marksData.forEach(course => {
+      const percentage = calculatePercentage(course.total.obtained, course.total.total);
+      totalPercentage += percentage;
+      
+      if (percentage > bestCourse.percentage) {
+        bestCourse.name = course.course;
+        bestCourse.percentage = percentage;
+      }
+    });
+    
+    const averagePercentage = Math.round(totalPercentage / totalCourses);
+    
+    return {
+      averagePercentage,
+      bestCourse: bestCourse.name,
+      improvement: '+8.5%',
+      rank: '12/150'
+    };
+  }
+
+  /**
+   * Shows a toast notification
+   * @param {string} message - Message to display
+   * @param {string} type - Type of toast (success, error, warning)
+   */
+  function showToast(message, type = 'info') {
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-times-circle' : 
+                type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <i class="fas ${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      toast.style.animation = 'fadeOut 0.5s ease';
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+  /**
+   * Format date to readable string
+   * @param {string} dateString - Date string
+   * @returns {string} Formatted date
+   */
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  }
+
+  /**
+   * Initialize performance chart
+   */
+  function initializePerformanceChart() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (performanceChart) {
+      performanceChart.destroy();
+    }
+    
+    // Get data for chart
+    const labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'];
+    const datasets = marksData.map((course, index) => {
+      const colors = [
+        'rgba(106, 17, 203, 0.8)',
+        'rgba(46, 204, 113, 0.8)',
+        'rgba(243, 156, 18, 0.8)',
+        'rgba(155, 89, 182, 0.8)',
+        'rgba(52, 152, 219, 0.8)'
+      ];
+      
+      return {
+        label: course.course,
+        data: course.performance,
+        borderColor: colors[index],
+        backgroundColor: colors[index].replace('0.8', '0.1'),
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4
+      };
+    });
+    
+    performanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            min: 60,
+            max: 100,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'nearest'
+        }
+      }
+    });
+  }
+
+  /**
+   * Initialize grade distribution chart
+   */
+  function initializeGradeChart() {
+    const ctx = document.getElementById('gradeChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (gradeChart) {
+      gradeChart.destroy();
+    }
+    
+    // Calculate grade distribution
+    const gradeCounts = {
+      'A': 0,
+      'A-': 0,
+      'B+': 0,
+      'B': 0,
+      'C+': 0,
+      'C': 0
+    };
+    
+    marksData.forEach(course => {
+      gradeCounts[course.grade] = (gradeCounts[course.grade] || 0) + 1;
+    });
+    
+    const grades = Object.keys(gradeCounts);
+    const counts = Object.values(gradeCounts);
+    
+    // Define colors for each grade
+    const gradeColors = {
+      'A': 'rgba(46, 204, 113, 0.8)',
+      'A-': 'rgba(46, 204, 113, 0.6)',
+      'B+': 'rgba(243, 156, 18, 0.8)',
+      'B': 'rgba(243, 156, 18, 0.6)',
+      'C+': 'rgba(231, 76, 60, 0.8)',
+      'C': 'rgba(231, 76, 60, 0.6)'
+    };
+    
+    const backgroundColors = grades.map(grade => gradeColors[grade] || 'rgba(149, 165, 166, 0.8)');
+    
+    gradeChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: grades,
+        datasets: [{
+          data: counts,
+          backgroundColor: backgroundColors,
+          borderColor: 'white',
+          borderWidth: 2,
+          hoverOffset: 15
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              padding: 20,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ${value} course${value !== 1 ? 's' : ''} (${percentage}%)`;
+              }
+            }
+          }
+        },
+        cutout: '60%'
+      }
+    });
+  }
+
+  /**
+   * Populate marks table with data
+   */
+  function populateMarksTable() {
+    marksTableBody.innerHTML = '';
+    
+    marksData.forEach((course, index) => {
+      const row = document.createElement('tr');
+      row.style.animationDelay = `${index * 0.1}s`;
+      
+      const assignmentPercentage = calculatePercentage(course.assignments.obtained, course.assignments.total);
+      const quizPercentage = calculatePercentage(course.quizzes.obtained, course.quizzes.total);
+      const midtermPercentage = calculatePercentage(course.midterm.obtained, course.midterm.total);
+      const totalPercentage = calculatePercentage(course.total.obtained, course.total.total);
+      
+      const courseIconClass = course.course.toLowerCase().includes('programming') ? 'programming' :
+                             course.course.toLowerCase().includes('data') ? 'data-structures' :
+                             course.course.toLowerCase().includes('communication') ? 'communication' :
+                             course.course.toLowerCase().includes('database') ? 'database' : 'web-dev';
+      
+      row.innerHTML = `
+        <td>
+          <div class="course-title" data-course-id="${course.id}">
+            <div class="course-icon ${courseIconClass}">
+              <i class="fas fa-${courseIconClass === 'programming' ? 'code' : 
+                                courseIconClass === 'data-structures' ? 'sitemap' : 
+                                courseIconClass === 'communication' ? 'comments' : 
+                                courseIconClass === 'database' ? 'database' : 'laptop'}"></i>
+            </div>
+            <div>
+              <strong>${course.course}</strong>
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">${course.code} • ${course.instructor}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="marks-cell">
+            <div class="marks-value">${course.assignments.obtained}/${course.assignments.total}</div>
+            <div class="marks-percentage">
+              <div class="percentage-indicator">
+                <div class="percentage-fill" style="width: ${assignmentPercentage}%; background: ${getPercentageColor(assignmentPercentage)}"></div>
+              </div>
+              <span>${assignmentPercentage}%</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="marks-cell">
+            <div class="marks-value">${course.quizzes.obtained}/${course.quizzes.total}</div>
+            <div class="marks-percentage">
+              <div class="percentage-indicator">
+                <div class="percentage-fill" style="width: ${quizPercentage}%; background: ${getPercentageColor(quizPercentage)}"></div>
+              </div>
+              <span>${quizPercentage}%</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="marks-cell">
+            <div class="marks-value">${course.midterm.obtained}/${course.midterm.total}</div>
+            <div class="marks-percentage">
+              <div class="percentage-indicator">
+                <div class="percentage-fill" style="width: ${midtermPercentage}%; background: ${getPercentageColor(midtermPercentage)}"></div>
+              </div>
+              <span>${midtermPercentage}%</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="total-cell">
+            <div>${course.total.obtained}/${course.total.total}</div>
+            <div class="marks-percentage">
+              <div class="percentage-indicator">
+                <div class="percentage-fill" style="width: ${totalPercentage}%; background: ${getPercentageColor(totalPercentage)}"></div>
+              </div>
+              <span>${totalPercentage}%</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="total-cell">
+            <div>${course.grade}</div>
+            <span class="grade-badge ${course.grade.charAt(0)}">${calculateGrade(totalPercentage)}</span>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Updated: ${formatDate(course.lastUpdated)}</div>
+          </div>
+        </td>
+      `;
+      
+      // Add click event to course title for details modal
+      const courseTitle = row.querySelector('.course-title');
+      courseTitle.addEventListener('click', () => showCourseDetails(course));
+      
+      marksTableBody.appendChild(row);
+    });
+  }
+
+  /**
+   * Show course details modal
+   * @param {Object} course - Course data
+   */
+  function showCourseDetails(course) {
+    const totalPercentage = calculatePercentage(course.total.obtained, course.total.total);
+    
+    const modalHTML = `
+      <div class="modal-overlay" id="course-modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fas fa-chart-bar"></i> ${course.course} (${course.code}) - Detailed Marks</h3>
+            <button class="modal-close-btn" id="close-modal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+              <h4 style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem;">Marks Breakdown</h4>
+              <div style="background: #f8fafc; border-radius: 15px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
+                  <div>
+                    <div style="font-weight: 600; color: #475569;">Assignment</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Weight: ${course.assignments.weight}%</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; font-size: 1.2rem; color: #1a1a2e;">${course.assignments.obtained}/${course.assignments.total}</div>
+                    <div style="color: #6a11cb; font-weight: 600;">${calculatePercentage(course.assignments.obtained, course.assignments.total)}%</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
+                  <div>
+                    <div style="font-weight: 600; color: #475569;">Quiz</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Weight: ${course.quizzes.weight}%</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; font-size: 1.2rem; color: #1a1a2e;">${course.quizzes.obtained}/${course.quizzes.total}</div>
+                    <div style="color: #6a11cb; font-weight: 600;">${calculatePercentage(course.quizzes.obtained, course.quizzes.total)}%</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between;">
+                  <div>
+                    <div style="font-weight: 600; color: #475569;">Midterm</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">Weight: ${course.midterm.weight}%</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-weight: 700; font-size: 1.2rem; color: #1a1a2e;">${course.midterm.obtained}/${course.midterm.total}</div>
+                    <div style="color: #6a11cb; font-weight: 600;">${calculatePercentage(course.midterm.obtained, course.midterm.total)}%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem;">Summary</h4>
+              <div style="background: #f8fafc; border-radius: 15px; padding: 1.5rem; text-align: center;">
+                <div style="font-size: 3rem; font-weight: 800; color: ${getPercentageColor(totalPercentage)}; margin-bottom: 0.5rem;">
+                  ${totalPercentage}%
+                </div>
+                <div style="font-weight: 600; color: #475569; margin-bottom: 0.5rem;">Overall Score</div>
+                <div style="display: inline-block; padding: 0.5rem 1.5rem; background: ${getPercentageColor(totalPercentage)}20; color: ${getPercentageColor(totalPercentage)}; border-radius: 20px; font-weight: 600;">
+                  ${course.grade} Grade
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: #64748b;">
+                  ${course.total.obtained} out of ${course.total.total} points
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 2rem;">
+            <h4 style="color: #475569; margin-bottom: 1rem; font-size: 1.1rem;">Performance Analysis</h4>
+            <div style="background: #f8fafc; border-radius: 15px; padding: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 20px; height: 20px; border-radius: 50%; background: ${course.trend === 'up' ? '#2ecc71' : course.trend === 'down' ? '#e74c3c' : '#f39c12'};"></div>
+                <div>
+                  <div style="font-weight: 600; color: #475569;">Trend: ${course.trend === 'up' ? 'Improving' : course.trend === 'down' ? 'Needs Attention' : 'Stable'}</div>
+                  <div style="color: #64748b; font-size: 0.9rem;">
+                    ${course.trend === 'up' ? 'Your performance is improving consistently' : 
+                      course.trend === 'down' ? 'Consider reviewing previous materials' : 
+                      'Your performance has been consistent'}
+                  </div>
+                </div>
+              </div>
+              <div style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">
+                <strong>Recommendation:</strong> ${totalPercentage >= 85 ? 'Excellent work! Continue with the same effort.' : 
+                  totalPercentage >= 75 ? 'Good performance. Focus on weak areas for improvement.' : 
+                  'Consider seeking additional help or tutoring.'}
+              </div>
+            </div>
+          </div>
+          
+          <div style="text-align: right;">
+            <button id="close-modal-bottom" class="action-btn" style="background: #6a11cb; color: white; border: none; padding: 0.8rem 1.5rem;">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners for closing modal
+    const closeModal = () => {
+      const modal = document.getElementById('course-modal');
+      modal.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => modal.remove(), 300);
+    };
+    
+    document.getElementById('close-modal').addEventListener('click', closeModal);
+    document.getElementById('close-modal-bottom').addEventListener('click', closeModal);
+    
+    // Close on overlay click
+    document.querySelector('.modal-overlay').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+      }
+    });
+    
+    // Close with Escape key
+    const closeOnEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', closeOnEscape);
+      }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+  }
+
+  /**
+   * Update statistics display
+   */
+  function updateStatisticsDisplay() {
+    const stats = calculateStatistics();
+    
+    overallAverageEl.textContent = `${stats.averagePercentage}%`;
+    bestCourseEl.textContent = stats.bestCourse;
+    improvementRateEl.textContent = stats.improvement;
+    currentRankEl.textContent = stats.rank;
+    overallProgressEl.style.width = `${stats.averagePercentage}%`;
+    
+    // Animate progress bars
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach(bar => {
+      const targetWidth = bar.style.width;
+      bar.style.width = '0%';
+      
+      setTimeout(() => {
+        bar.style.transition = 'width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        bar.style.width = targetWidth;
+      }, 100);
+    });
+  }
+
+  /**
+   * Export marks report
+   */
+  function exportReport() {
+    showToast('Generating PDF report...', 'info');
+    
+    // Simulate report generation
+    setTimeout(() => {
+      showToast('Report exported successfully!', 'success');
+      
+      // In a real app, this would trigger a file download
+      // For demo, show a confirmation
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + ["Course,Assignment,Quiz,Midterm,Total,Grade,Percentage"].join(",") + "\n"
+        + marksData.map(course => 
+            `"${course.course}","${course.assignments.obtained}/${course.assignments.total}","${course.quizzes.obtained}/${course.quizzes.total}","${course.midterm.obtained}/${course.midterm.total}","${course.total.obtained}/${course.total.total}","${course.grade}","${calculatePercentage(course.total.obtained, course.total.total)}%"`
+          ).join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "marks_report.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 1500);
+  }
+
+  /**
+   * Print marks page
+   */
+  function printPage() {
+    showToast('Preparing for print...', 'info');
+    
+    setTimeout(() => {
+      window.print();
+      showToast('Print dialog opened', 'success');
+    }, 1000);
+  }
+
+  /**
+   * Refresh marks data
+   */
+  function refreshData() {
+    showToast('Refreshing marks data...', 'info');
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing';
+    refreshBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+      // In a real app, this would fetch fresh data from server
+      showToast('Marks data updated successfully!', 'success');
+      refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+      refreshBtn.disabled = false;
+      
+      // Simulate random updates to marks
+      marksData.forEach(course => {
+        // Random small change to simulate update
+        const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+        if (course.total.obtained + change >= 0 && course.total.obtained + change <= course.total.total) {
+          course.total.obtained += change;
+        }
+        
+        // Update grade based on new total
+        const newPercentage = calculatePercentage(course.total.obtained, course.total.total);
+        course.grade = calculateGrade(newPercentage);
+      });
+      
+      // Update display
+      populateMarksTable();
+      updateStatisticsDisplay();
+      initializeGradeChart();
+    }, 2000);
+  }
+
+  /**
+   * Initialize chart filters
+   */
+  function initializeChartFilters() {
+    chartFilters.forEach(filter => {
+      filter.addEventListener('click', function() {
+        // Update active state
+        chartFilters.forEach(f => f.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show toast
+        const period = this.getAttribute('data-period');
+        showToast(`Showing ${period} performance data`, 'info');
+        
+        // In a real app, this would update the chart data
+        // For demo, we'll just update the chart title
+        const chartTitle = document.querySelector('.chart-header h3');
+        if (period === 'month') {
+          chartTitle.textContent = 'Monthly Performance';
+        } else if (period === 'weekly') {
+          chartTitle.textContent = 'Weekly Performance';
+        } else {
+          chartTitle.textContent = 'Performance Trend';
+        }
+      });
+    });
+  }
+
+  /**
+   * Initialize the page
+   */
+  function initPage() {
+    // Populate marks table
+    populateMarksTable();
+    
+    // Update statistics
+    updateStatisticsDisplay();
+    
+    // Initialize charts
+    initializePerformanceChart();
+    initializeGradeChart();
+    
+    // Initialize chart filters
+    initializeChartFilters();
+    
+    // Event listeners
+    backBtn.addEventListener('click', function() {
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+      this.disabled = true;
+      
+      showToast('Returning to Dashboard...', 'info');
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.disabled = false;
+        // In real app: window.location.href = 'dashboard.html';
+        showToast('Dashboard navigation simulated.', 'info');
+      }, 1500);
+    });
+    
+    exportBtn.addEventListener('click', exportReport);
+    printBtn.addEventListener('click', printPage);
+    refreshBtn.addEventListener('click', refreshData);
+    
+    // Show welcome message
+    setTimeout(() => {
+      showToast('Welcome to Internal Marks Dashboard! Click on any course for detailed analysis.', 'success');
+    }, 1000);
+    
+    // Add CSS for fadeOut animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Initialize when page loads
+  document.addEventListener('DOMContentLoaded', initPage);
+</script>
 </body>
 </html>
